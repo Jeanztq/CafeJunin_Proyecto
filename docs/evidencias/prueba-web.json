@@ -1,0 +1,11 @@
+{
+  "resultado": "OK",
+  "modo": "DOM simulado jsdom contra JAR real en HTTP",
+  "recorrido": [
+    "registrar cosecha",
+    "registrar calidad",
+    "evaluar riesgo",
+    "consultar alerta"
+  ],
+  "revisionVisualNavegador": false
+}

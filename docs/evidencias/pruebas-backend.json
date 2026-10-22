@@ -1,0 +1,43 @@
+{
+  "fecha": "2026-10-22",
+  "jdk": "17.0.20",
+  "springBoot": "3.5.16",
+  "maven": "3.9.11",
+  "suites": [
+    {
+      "name": "pe.cafejunin.ApiTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "pe.cafejunin.ArquitecturaTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "pe.cafejunin.CasosDeUsoTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "pe.cafejunin.PostgresIntegrationTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "1"
+    },
+    {
+      "name": "pe.cafejunin.SecurityTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ]
+}

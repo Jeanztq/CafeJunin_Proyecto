@@ -1,0 +1,18 @@
+services:
+ postgres:
+  image: postgres:17
+  environment:
+   POSTGRES_DB: ${DB_NAME:-cafejunin}
+   POSTGRES_USER: ${DB_USER:-cafejunin}
+   POSTGRES_PASSWORD: ${DB_PASSWORD:?Copie .env.example como .env y configure DB_PASSWORD}
+  ports:
+   - "127.0.0.1:5432:5432"
+  volumes:
+   - cafejunin_data:/var/lib/postgresql/data
+  healthcheck:
+   test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+   interval: 5s
+   timeout: 3s
+   retries: 12
+volumes:
+ cafejunin_data:

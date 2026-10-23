@@ -1,0 +1,147 @@
+{
+  "realm": "cafejunin",
+  "enabled": true,
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "loginWithEmailAllowed": true,
+  "sslRequired": "external",
+  "roles": {
+    "realm": [
+      {
+        "name": "PRODUCTOR"
+      },
+      {
+        "name": "CATADOR"
+      },
+      {
+        "name": "SUPERVISOR"
+      },
+      {
+        "name": "TRANSPORTISTA"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "cafejunin-web",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:8080/*",
+        "http://127.0.0.1:8080/*",
+        "http://localhost:5173/*",
+        "http://127.0.0.1:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "+"
+      },
+      "protocolMappers": [
+        {
+          "name": "api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "cafejunin-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1",
+      "username": "productor",
+      "email": "productor@example.test",
+      "firstName": "Productor",
+      "lastName": "Prueba local",
+      "enabled": true,
+      "emailVerified": true,
+      "realmRoles": [
+        "PRODUCTOR"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "CafeJunin-Local-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2",
+      "username": "catador",
+      "email": "catador@example.test",
+      "firstName": "Catador",
+      "lastName": "Prueba local",
+      "enabled": true,
+      "emailVerified": true,
+      "realmRoles": [
+        "CATADOR"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "CafeJunin-Local-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": [
+        "CONFIGURE_TOTP"
+      ]
+    },
+    {
+      "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3",
+      "username": "supervisor",
+      "email": "supervisor@example.test",
+      "firstName": "Supervisor",
+      "lastName": "Prueba local",
+      "enabled": true,
+      "emailVerified": true,
+      "realmRoles": [
+        "SUPERVISOR"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "CafeJunin-Local-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": [
+        "CONFIGURE_TOTP"
+      ]
+    },
+    {
+      "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4",
+      "username": "transportista",
+      "email": "transportista@example.test",
+      "firstName": "Transportista",
+      "lastName": "Prueba local",
+      "enabled": true,
+      "emailVerified": true,
+      "realmRoles": [
+        "TRANSPORTISTA"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "CafeJunin-Local-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    }
+  ]
+}

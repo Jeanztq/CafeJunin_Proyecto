@@ -1,5 +1,10 @@
 USE cafejunin;
 GO
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+-- Aquí continúa el resto de tu script original (CREATE TABLE, CREATE INDEX, etc.)
+
 IF OBJECT_ID(N'dbo.parcelas',N'U') IS NULL
  CREATE TABLE dbo.parcelas (id uniqueidentifier PRIMARY KEY,nombre nvarchar(160) NOT NULL,ubicacion nvarchar(250) NOT NULL,propietario_subject nvarchar(200) NOT NULL);
 GO

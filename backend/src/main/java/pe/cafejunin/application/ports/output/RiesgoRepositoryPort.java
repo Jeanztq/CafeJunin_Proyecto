@@ -9,4 +9,10 @@ public interface RiesgoRepositoryPort {
   void guardar(Alerta alerta);
 
   List<Alerta> listarAlertas();
+
+  Optional<Alerta> buscarAlerta(UUID id);
+
+  void actualizarPendiente(Alerta alerta);
+
+  List<EvaluacionRiesgo> riesgosDe(UUID loteId);
 }

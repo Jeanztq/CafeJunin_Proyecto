@@ -21,7 +21,40 @@ public final class MemoryStore
   private List<EventoDominio> eventos = new ArrayList<>();
 
   public synchronized boolean existeParcela(UUID id) {
-    return PARCELA_DEMO.equals(id);
+    return buscarParcela(id).isPresent();
+  }
+
+  public synchronized Optional<Parcela> buscarParcela(UUID id) {
+    return listarParcelas().stream().filter(p -> p.id().equals(id)).findFirst();
+  }
+
+  public synchronized List<Parcela> listarParcelas() {
+    return List.of(
+        new Parcela(PARCELA_DEMO, "El Mirador · Demo local", "Satipo, Junín", "demo"),
+        new Parcela(
+            UUID.fromString("22222222-2222-2222-2222-222222222222"),
+            "El Mirador · Productor de prueba",
+            "Satipo, Junín",
+            "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"));
+  }
+
+  public synchronized List<EvaluacionCalidad> calidadDe(UUID id) {
+    return calidad.values().stream().filter(x -> x.loteId().equals(id)).toList();
+  }
+
+  public synchronized List<EvaluacionRiesgo> riesgosDe(UUID id) {
+    return riesgos.values().stream().filter(x -> x.loteId().equals(id)).toList();
+  }
+
+  public synchronized Optional<Alerta> buscarAlerta(UUID id) {
+    return Optional.ofNullable(alertas.get(id));
+  }
+
+  public synchronized void actualizarPendiente(Alerta a) {
+    var actual = alertas.get(a.id());
+    if (actual == null || !actual.estado().equals("PENDIENTE"))
+      throw new ConflictoException("La alerta ya fue revisada");
+    alertas.put(a.id(), a);
   }
 
   public synchronized Optional<Lote> buscarLote(UUID id) {

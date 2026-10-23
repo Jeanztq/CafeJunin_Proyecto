@@ -33,4 +33,34 @@ class SecurityTest {
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
         .andExpect(status().isOk());
   }
+
+  @Test
+  void productorNoPuedeRegistrarEnParcelaAjena() throws Exception {
+    String body =
+        "{\"id\":\""
+            + java.util.UUID.randomUUID()
+            + "\",\"parcelaId\":\"11111111-1111-1111-1111-111111111111\",\"fechaCosecha\":\"2025-01-01\",\"variedad\":\"BOURBON\",\"tipoRecoleccion\":\"SELECTIVA\",\"pesoKg\":20}";
+    mvc.perform(
+            post("/api/lotes")
+                .with(
+                    jwt()
+                        .jwt(j -> j.subject("otro-productor"))
+                        .authorities(new SimpleGrantedAuthority("ROLE_PRODUCTOR")))
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(body))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void usuarioSinEspecialidadNoVeLotesYNoPuedeEvaluar() throws Exception {
+    mvc.perform(get("/api/lotes").with(jwt()))
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
+    mvc.perform(
+            post("/api/lotes/" + java.util.UUID.randomUUID() + "/riesgos")
+                .with(jwt())
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content("{\"humedad\":80,\"horasDemora\":5}"))
+        .andExpect(status().isForbidden());
+  }
 }

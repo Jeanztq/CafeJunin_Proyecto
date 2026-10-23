@@ -27,6 +27,34 @@ public class SecurityConfiguration {
 
   @Bean
   @ConditionalOnProperty(name = "app.security.enabled", havingValue = "true")
+  org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder(
+      @org.springframework.beans.factory.annotation.Value("${app.keycloak.url}") String url,
+      @org.springframework.beans.factory.annotation.Value("${app.keycloak.realm}") String realm,
+      @org.springframework.beans.factory.annotation.Value("${app.security.audience}")
+          String audience) {
+    String issuer = url + "/realms/" + realm;
+    var decoder =
+        org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withJwkSetUri(
+                issuer + "/protocol/openid-connect/certs")
+            .build();
+    org.springframework.security.oauth2.core.OAuth2TokenValidator<
+            org.springframework.security.oauth2.jwt.Jwt>
+        aud =
+            jwt ->
+                jwt.getAudience().contains(audience)
+                    ? org.springframework.security.oauth2.core.OAuth2TokenValidatorResult.success()
+                    : org.springframework.security.oauth2.core.OAuth2TokenValidatorResult.failure(
+                        new org.springframework.security.oauth2.core.OAuth2Error(
+                            "invalid_token", "Audiencia inválida", null));
+    decoder.setJwtValidator(
+        new org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator<>(
+            org.springframework.security.oauth2.jwt.JwtValidators.createDefaultWithIssuer(issuer),
+            aud));
+    return decoder;
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "app.security.enabled", havingValue = "true")
   SecurityFilterChain oidc(HttpSecurity http) throws Exception {
     var converter = new JwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(
@@ -45,18 +73,17 @@ public class SecurityConfiguration {
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             a ->
-                a.requestMatchers(HttpMethod.GET, "/api/info")
+                a.requestMatchers(
+                        HttpMethod.GET,
+                        "/api/info",
+                        "/api/config",
+                        "/",
+                        "/index.html",
+                        "/assets/**",
+                        "/favicon.svg")
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/lotes")
-                    .hasRole("PRODUCTOR")
-                    .requestMatchers(HttpMethod.POST, "/api/lotes/*/evaluaciones")
-                    .hasRole("CATADOR")
-                    .requestMatchers(HttpMethod.POST, "/api/lotes/*/riesgos")
-                    .hasRole("SUPERVISOR")
-                    .requestMatchers(HttpMethod.GET, "/api/alertas")
-                    .hasRole("SUPERVISOR")
-                    .requestMatchers(HttpMethod.GET, "/api/lotes")
-                    .hasAnyRole("PRODUCTOR", "CATADOR", "SUPERVISOR", "TRANSPORTISTA")
+                    .requestMatchers("/api/**")
+                    .authenticated()
                     .anyRequest()
                     .denyAll())
         .oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(converter)))

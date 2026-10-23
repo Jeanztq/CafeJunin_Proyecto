@@ -9,33 +9,33 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pe.cafejunin.application.ports.input.*;
+import pe.cafejunin.application.ports.input.PortalUseCase;
+import pe.cafejunin.domain.builder.LoteBuilder;
 import pe.cafejunin.domain.entities.*;
-import pe.cafejunin.domain.valueobjects.Peso;
 
 @RestController
 @RequestMapping("/api")
 public class TrazabilidadController {
-  private final RegistrarCosechaUseCase cosecha;
-  private final RegistrarCalidadUseCase calidad;
-  private final EvaluarRiesgoUseCase riesgo;
-  private final ConsultarTrazabilidadUseCase consulta;
+  private final PortalUseCase portal;
   private final Environment env;
   private final boolean seguridad;
+  private final String url, realm, client, predictor;
 
   public TrazabilidadController(
-      RegistrarCosechaUseCase cosecha,
-      RegistrarCalidadUseCase calidad,
-      EvaluarRiesgoUseCase riesgo,
-      ConsultarTrazabilidadUseCase consulta,
-      Environment env,
-      @Value("${app.security.enabled:false}") boolean seguridad) {
-    this.cosecha = cosecha;
-    this.calidad = calidad;
-    this.riesgo = riesgo;
-    this.consulta = consulta;
-    this.env = env;
-    this.seguridad = seguridad;
+      PortalUseCase p,
+      Environment e,
+      @Value("${app.security.enabled:false}") boolean s,
+      @Value("${app.keycloak.url}") String u,
+      @Value("${app.keycloak.realm}") String r,
+      @Value("${app.keycloak.client}") String c,
+      @Value("${app.predictor.mode}") String m) {
+    portal = p;
+    env = e;
+    seguridad = s;
+    url = u;
+    realm = r;
+    client = c;
+    predictor = m;
   }
 
   public record CosechaRequest(
@@ -55,28 +55,80 @@ public class TrazabilidadController {
       @NotNull @DecimalMin("0") @DecimalMax("100") Double humedad,
       @NotNull @DecimalMin("0") Double horasDemora) {}
 
-  @PostMapping("/lotes")
-  @ResponseStatus(HttpStatus.CREATED)
-  public Lote registrar(@Valid @RequestBody CosechaRequest r) {
-    return cosecha.ejecutar(
-        new Lote(
-            r.id(),
-            r.parcelaId(),
-            r.fechaCosecha(),
-            r.variedad(),
-            r.tipoRecoleccion(),
-            new Peso(r.pesoKg())));
+  public record DecisionRequest(
+      @NotNull UUID operacionId,
+      @NotBlank String estado,
+      @NotBlank @Size(max = 1000) String motivo,
+      @Size(max = 1000) String instruccion) {}
+
+  @GetMapping("/config")
+  public Map<String, Object> config() {
+    return Map.of(
+        "seguridadActiva",
+        seguridad,
+        "url",
+        url,
+        "realm",
+        realm,
+        "clientId",
+        client,
+        "predictor",
+        predictor);
+  }
+
+  @GetMapping("/info")
+  public Map<String, Object> info() {
+    return Map.of(
+        "sistema",
+        "Café Junín",
+        "seguridadActiva",
+        seguridad,
+        "perfiles",
+        env.getActiveProfiles().length == 0 ? env.getDefaultProfiles() : env.getActiveProfiles(),
+        "predictor",
+        predictor,
+        "eventos",
+        "Outbox transaccional; publicador externo pendiente");
+  }
+
+  @GetMapping("/me")
+  public Cuenta cuenta() {
+    return portal.cuenta();
+  }
+
+  @GetMapping("/parcelas")
+  public List<Parcela> parcelas() {
+    return portal.parcelas();
   }
 
   @GetMapping("/lotes")
-  public List<Lote> listar() {
-    return consulta.lotes();
+  public List<Lote> lotes() {
+    return portal.lotes();
+  }
+
+  @GetMapping("/lotes/{id}/detalle")
+  public PortalUseCase.Detalle detalle(@PathVariable UUID id) {
+    return portal.detalle(id);
+  }
+
+  @PostMapping("/lotes")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Lote cosecha(@Valid @RequestBody CosechaRequest r) {
+    return portal.cosecha(
+        new LoteBuilder()
+            .identificado(r.id())
+            .deParcela(r.parcelaId())
+            .cosechado(r.fechaCosecha())
+            .variedad(r.variedad())
+            .recoleccion(r.tipoRecoleccion())
+            .peso(r.pesoKg())
+            .build());
   }
 
   @PostMapping("/lotes/{id}/evaluaciones")
   @ResponseStatus(HttpStatus.CREATED)
-  public EvaluacionCalidad evaluar(@PathVariable UUID id, @Valid @RequestBody CalidadRequest r) {
-    return calidad.ejecutar(
+  public EvaluacionCalidad calidad(@PathVariable UUID id, @Valid @RequestBody CalidadRequest r) {
+    return portal.calidad(
         new EvaluacionCalidad(
             UUID.randomUUID(), id, r.defectosPrimarios(), r.defectosSecundarios(), r.puntajeSca()));
   }
@@ -84,27 +136,16 @@ public class TrazabilidadController {
   @PostMapping("/lotes/{id}/riesgos")
   @ResponseStatus(HttpStatus.CREATED)
   public EvaluacionRiesgo riesgo(@PathVariable UUID id, @Valid @RequestBody RiesgoRequest r) {
-    return riesgo.ejecutar(id, r.humedad(), r.horasDemora());
+    return portal.riesgo(id, r.humedad(), r.horasDemora());
   }
 
   @GetMapping("/alertas")
   public List<Alerta> alertas() {
-    return consulta.alertas();
+    return portal.alertas();
   }
 
-  @GetMapping("/info")
-  public Map<String, Object> info() {
-    String[] p = env.getActiveProfiles();
-    return Map.of(
-        "sistema",
-        "Café Junín",
-        "seguridadActiva",
-        seguridad,
-        "perfiles",
-        p.length == 0 ? env.getDefaultProfiles() : p,
-        "predictor",
-        "SIMULADOR: no IA real",
-        "eventos",
-        "Outbox pendiente; sin publicador Kafka");
+  @PutMapping("/alertas/{id}/decision")
+  public Alerta decision(@PathVariable UUID id, @Valid @RequestBody DecisionRequest r) {
+    return portal.revisar(id, r.operacionId(), r.estado(), r.motivo(), r.instruccion());
   }
 }

@@ -6,6 +6,12 @@ import pe.cafejunin.domain.events.*;
 
 // Factory Method: los creadores especializados construyen productos concretos.
 public abstract class EventoFactory {
+  public static final class Revision extends EventoFactory {
+    protected EventoDominio nuevo(UUID id, UUID agregadoId, Instant instante) {
+      return new AlertaRevisada(id, agregadoId, instante);
+    }
+  }
+
   protected abstract EventoDominio nuevo(UUID id, UUID agregadoId, Instant instante);
 
   public final EventoDominio crear(UUID agregadoId, Instant instante) {

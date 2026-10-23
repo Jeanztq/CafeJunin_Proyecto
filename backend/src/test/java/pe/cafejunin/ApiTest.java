@@ -38,7 +38,7 @@ class ApiTest {
     mvc.perform(
             post("/api/lotes/" + id + "/riesgos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"humedad\":22,\"horasDemora\":12}"))
+                .content("{\"humedad\":95,\"horasDemora\":36}"))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.simulada").value(true));
     mvc.perform(get("/api/alertas"))
@@ -52,7 +52,7 @@ class ApiTest {
     mvc.perform(
             post("/api/lotes/" + UUID.randomUUID() + "/riesgos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"humedad\":22,\"horasDemora\":12}"))
+                .content("{\"humedad\":95,\"horasDemora\":36}"))
         .andExpect(status().isNotFound());
   }
 

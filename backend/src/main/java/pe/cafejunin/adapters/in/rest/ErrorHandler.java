@@ -11,6 +11,21 @@ import pe.cafejunin.application.usecases.*;
 
 @RestControllerAdvice
 public class ErrorHandler {
+  @ExceptionHandler(ProhibidoException.class)
+  ResponseEntity<?> prohibido(RuntimeException e) {
+    return error(403, e.getMessage());
+  }
+
+  @ExceptionHandler(pe.cafejunin.adapters.out.prediction.PrediccionNoDisponibleException.class)
+  ResponseEntity<?> predictor(RuntimeException e) {
+    return error(503, "Predicción no disponible; no se guardó una evaluación");
+  }
+
+  @ExceptionHandler(org.springframework.dao.DataAccessException.class)
+  ResponseEntity<?> base(Exception e) {
+    return error(503, "Persistencia no disponible; revise la configuración del servidor");
+  }
+
   @ExceptionHandler(NoEncontradoException.class)
   ResponseEntity<?> noEncontrado(RuntimeException e) {
     return error(404, e.getMessage());

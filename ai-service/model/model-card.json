@@ -1,0 +1,18 @@
+{
+  "id": "xgboost-demo-v1",
+  "datasetType": "SYNTHETIC",
+  "validated": false,
+  "xgboostVersion": "3.4.1",
+  "features": {
+    "humedad": "Humedad relativa AMBIENTAL (%)",
+    "horasDemora": "Demora observada desde cosecha (horas)"
+  },
+  "rows": 2500,
+  "split": "75/25 aleatorio estratificado; sustituir por validación temporal y por finca para producción",
+  "metrics": {
+    "auc": 0.8833136412459721,
+    "brier": 0.13325342535972595
+  },
+  "sha256": "6991fcd8423c8e88cd198723347b3c2fb7dde4ea7d5befbeda773e325803f8c4",
+  "limitations": "Datos sintéticos o candidato no validado. No demuestra eficacia agronómica. Sin validación independiente, calibración ni seguimiento de deriva. No usar para decisiones reales."
+}

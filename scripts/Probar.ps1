@@ -1,5 +1,12 @@
-$ErrorActionPreference = 'Stop'
-Push-Location (Join-Path $PSScriptRoot '../web')
-try { npm test; if ($LASTEXITCODE -ne 0) { throw 'Falló React' }; npm run build; if ($LASTEXITCODE -ne 0) { throw 'Falló compilación React' } } finally { Pop-Location }
-Push-Location (Join-Path $PSScriptRoot '../backend')
-try { mvn verify; if ($LASTEXITCODE -ne 0) { throw 'Falló Java' } } finally { Pop-Location }
+﻿$ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Herramientas.ps1')
+Test-CafeEntorno
+$raiz = Split-Path -Parent $PSScriptRoot
+Push-Location (Join-Path $raiz 'web')
+try {
+    Invoke-CafeNpm -Arguments @('ci')
+    Invoke-CafeNpm -Arguments @('test')
+    Invoke-CafeNpm -Arguments @('run','build')
+} finally { Pop-Location }
+Push-Location (Join-Path $raiz 'backend')
+try { Invoke-CafeMaven -Arguments @('clean','verify') } finally { Pop-Location }

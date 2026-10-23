@@ -12,7 +12,7 @@ Al detener la demo se pierden sus registros. El JAR ya contiene React; no hace f
 
 ## Editar y recompilar
 
-Requisitos: JDK 17, Maven 3.9+, Node 22.12+ y npm. Abre `backend/pom.xml` en NetBeans o el repositorio completo en VS Code/Codex.
+Requisitos: JDK 17, Node.js 24 LTS y npm. Maven Wrapper descarga Maven 3.9.11 en su primera ejecución; ya no hace falta instalar mvn globalmente. Abre `backend/pom.xml` en NetBeans o el repositorio completo en VS Code/Codex.
 
 En PowerShell: `./scripts/Compilar.ps1`. Instala las dependencias web, compila React, ejecuta las pruebas Java y copia el JAR a `dist`.
 

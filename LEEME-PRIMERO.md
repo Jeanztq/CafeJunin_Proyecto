@@ -1,68 +1,31 @@
-# Café Junín — empezar aquí
+# Comenzar con la entrega 0.2
 
-Prototipo inicial para el proyecto de trazabilidad del café. Backend hexagonal Java/Spring Boot.
-**Implementado:** tres casos de uso, interfaz web demo, pruebas, persistencia en memoria o PostgreSQL,
-procedimientos almacenados, migraciones y registro transaccional de eventos pendientes.
-**Pendiente:** portal React por actor, login de clientes, app offline, modelo IA real, Kafka y el resto de RF/RNF.
+## Ver el portal en cinco minutos
 
-## Colocarlo en el Escritorio de Windows
+1. Extrae todo el ZIP; conserva `CafeJuninV2` como carpeta separada de la versión anterior.
+2. Instala JDK 17 y comprueba `java -version`.
+3. En Windows ejecuta `INICIAR-DEMO.cmd`, o desde esta carpeta: `java -jar dist/cafejunin-backend-0.2.0.jar --spring.profiles.active=memory`.
+4. Abre http://localhost:8080. La demo no pide credenciales, muestra el aviso correspondiente y guarda datos solo en memoria.
+5. Registra una cosecha con una parcela de la lista, consulta Lotes, registra Calidad y prueba Riesgo con humedad ambiental 95 y demora 60. En el simulador esto crea una alerta. Confírmala con motivo e instrucción o descártala con motivo.
 
-1. Extraiga el ZIP. Abra la carpeta `CafeJunin`.
-2. Puede mover esa carpeta directamente al Escritorio.
-3. Alternativamente, abra PowerShell en esa carpeta y ejecute:
+Al detener la demo se pierden sus registros. El JAR ya contiene React; no hace falta Node ni Maven para verla. No exponer este modo a Internet.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Instalar-En-Escritorio.ps1
-```
+## Editar y recompilar
 
-El script copia el proyecto a la ruta de Escritorio que informa Windows, incluido OneDrive si corresponde.
-No sobrescribe una carpeta `CafeJunin` existente. La opción de ejecución sólo afecta ese proceso.
+Requisitos: JDK 17, Maven 3.9+, Node 22.12+ y npm. Abre `backend/pom.xml` en NetBeans o el repositorio completo en VS Code/Codex.
 
-## Ejecutar la demo sin Maven
+En PowerShell: `./scripts/Compilar.ps1`. Instala las dependencias web, compila React, ejecuta las pruebas Java y copia el JAR a `dist`.
 
-Instale JDK 17. Haga doble clic en `INICIAR-DEMO.cmd` y mantenga abierta la consola.
-Cuando aparezca `Started CafeJuninApplication`, abra http://localhost:8080.
-Se incluye `dist/cafejunin-backend-0.1.0.jar`, generado desde el código de esta entrega.
-No necesita Maven para esta opción. Al modificar el código, debe reconstruir el ejecutable.
+Para editar la web con recarga: inicia el backend, luego `cd web`, `npm ci`, `npm run dev`; abre http://localhost:5173. Vite reenvía `/api` al backend local.
 
-## Ejecutar desde el código sin base de datos
+## Conectar los servicios
 
-Instale JDK 17 y Maven 3.9 o posterior. JDK 17 es la referencia para esta entrega; no depende del JDK 24 usado en otros ejercicios.
-Compruebe `java -version` y `mvn -version`. Abra la carpeta `backend` como proyecto Maven en NetBeans, IntelliJ o VS Code.
-Desde PowerShell en la raíz:
+Sigue **docs/CONEXIONES.md** para SQL Server, Keycloak, XGBoost y GitHub. Son pasos distintos de la demo en memoria. No se han creado servicios remotos ni publicado el repositorio.
 
-```powershell
-.\scripts\Iniciar-Demo.ps1
-```
+## Escritorio de Windows
 
-Si su política de PowerShell bloquea scripts, puede usar directamente:
+`./scripts/Instalar-En-Escritorio.ps1` copia el proyecto a una carpeta nueva `CafeJuninV2` en tu Escritorio y se detiene si ya existe, para no sobrescribir cambios. No se puede ejecutar desde este entorno en tu computadora.
 
-```powershell
-cd backend
-mvn spring-boot:run -Dspring-boot.run.profiles=memory
-```
+## Próximo paso contigo
 
-Abra http://localhost:8080. Registre una cosecha; su ID se trasladará a calidad y riesgo.
-El modo memoria pierde sus datos al cerrar el backend. No necesita PostgreSQL, Docker ni Keycloak.
-La primera descarga de Maven necesita Internet.
-
-## Verificación
-
-```powershell
-cd backend
-mvn verify
-```
-
-Consulte `docs/VALIDACION.md` para saber qué se comprobó realmente al entregar.
-Para probar desde otra consola mientras el backend está encendido: `scripts/Demostrar-API.ps1`.
-
-## Siguiente lectura
-
-- `README.md`: mapa de carpetas.
-- `docs/ARQUITECTURA.md`: puertos, adaptadores y patrones.
-- `docs/CASOS-DE-USO.md`: tres casos y criterios Given–When–Then.
-- `database/README.md`: PostgreSQL y migraciones.
-- `docs/GITHUB.md`: control de versiones y publicación.
-- `docs/ALCANCE-Y-PENDIENTES.md`: avance real y límites.
-
-La interfaz demo no tiene autenticación y sólo se publica en loopback por defecto. No desplegar ese modo en Internet.
+Primero ejecutar SQL Server y Keycloak en tu PC y verificar acceso con productor, catador y supervisor. Después completar la ficha de calidad y la autenticación/sincronización móvil. No necesitas una app de escritorio específica para seguir; sí un entorno de Codex con acceso a la carpeta del proyecto si quieres que modifique y pruebe tus archivos directamente.

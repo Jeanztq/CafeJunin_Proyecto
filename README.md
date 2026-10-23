@@ -1,22 +1,21 @@
-# Café Junín
+# Café Junín · Entrega 0.2
 
-Primera implementación académica de un sistema de trazabilidad del café de Junín.
-Comience por **LEEME-PRIMERO.md**.
+Sistema de trazabilidad del café. Un backend compartido para portal web y futuro cliente móvil sincronizado. Empieza por **LEEME-PRIMERO.md**. Esta entrega amplía la versión anterior en una carpeta independiente.
 
 | Carpeta | Contenido |
 |---|---|
-| backend | API Java/Spring Boot, dominio puro, puertos, casos de uso, adaptadores y pruebas |
-| web | Interfaz HTML de demostración funcional; futuro portal React |
-| mobile | Base Flutter y organización prevista; aún sin captura ni sincronización |
-| database/migrations | Esquema y procedimientos SQL versionados con Flyway |
-| database/dev | Datos ficticios de desarrollo |
-| infra | Docker Compose para PostgreSQL |
-| docs | Arquitectura, casos, modelo, contrato y evidencia de validación |
-| scripts | Inicio, pruebas, demostración y copia al Escritorio en Windows |
-| .github/workflows | Validación del backend y PostgreSQL en GitHub Actions |
+| backend | Java 17, Spring Boot, arquitectura hexagonal, REST y pruebas |
+| web | Portal React/Vite, navegación por roles, cliente Keycloak con PKCE |
+| ai-service | FastAPI y XGBoost CPU; entrenamiento reproducible y modelo sintético incluido |
+| database/sqlserver | Esquema y procedimientos T-SQL, instalación manual ordenada |
+| infra | Docker Compose local: SQL Server, Keycloak y servicio IA; realm de prueba |
+| mobile | Código Flutter de captura y SQLite local; no compilado ni conectado todavía |
+| dist | JAR ejecutable que incluye el portal React |
+| tests | Integración HTTP entre JAR y servicio IA |
+| scripts | Inicio, compilación, pruebas, instalación y Git para Windows |
+| docs | Arquitectura, alcance, conexiones, contrato y evidencia |
+| .github/workflows | CI Java, React y Python, preparado para GitHub |
 
-Los modos `memory` y `postgres` son alternativas de persistencia, no sistemas distintos.
-Los clientes web y móvil utilizarán el mismo backend. No se crearon microservicios ni un backend por actor.
-No se publicó ningún repositorio remoto. `.env.example` es una plantilla, no contiene credenciales reales.
+Recorrido integrado: cosecha → evaluación básica de calidad → riesgo → alerta si probabilidad **mayor que 70%** → confirmación o descarte por supervisor. En demo, una identidad reúne permisos para recorrerlo. Con autenticación, cada cuenta recibe sus módulos y los permisos se verifican también en backend.
 
-Ejecutable listo en `dist/`. Con JDK 17, use `INICIAR-DEMO.cmd` en Windows. No requiere Maven para iniciar esa demo.
+No equivale a las 19 historias priorizadas completas. SQL Server y Keycloak están preparados pero pendientes de prueba real. El modelo XGBoost es real como implementación, pero su entrenamiento sintético no aporta evidencia predictiva agronómica. No usar para decisiones operativas.

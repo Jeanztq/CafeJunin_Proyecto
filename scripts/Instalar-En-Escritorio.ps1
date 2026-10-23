@@ -1,9 +1,9 @@
-﻿# Ejecutar desde el proyecto ya extraído. No requiere administrador.
+# Ejecutar desde el proyecto ya extraído. No requiere administrador.
 $ErrorActionPreference = 'Stop'
 $origen = Split-Path -Parent $PSScriptRoot
 $escritorio = [Environment]::GetFolderPath('Desktop')
 if ([string]::IsNullOrWhiteSpace($escritorio)) { throw 'Windows no devolvió una ruta de Escritorio.' }
-$destino = Join-Path $escritorio 'CafeJunin'
+$destino = Join-Path $escritorio 'CafeJuninV2'
 if ([IO.Path]::GetFullPath($origen).TrimEnd('\') -eq [IO.Path]::GetFullPath($destino).TrimEnd('\')) {
  Write-Host "El proyecto ya está en: $destino"
  exit 0

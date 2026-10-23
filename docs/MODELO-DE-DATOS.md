@@ -1,30 +1,9 @@
-# Modelo de datos del primer incremento
+# Persistencia SQL Server
 
-```mermaid
-erDiagram
- parcelas ||--o{ lotes : origina
- lotes ||--o{ evaluaciones_calidad : recibe
- lotes ||--o{ evaluaciones_riesgo : recibe
- evaluaciones_riesgo ||--o| alertas : genera
- lotes ||--o{ outbox_eventos : registra
-```
+Tablas: parcelas → lotes → evaluaciones_calidad / evaluaciones_riesgo → alertas. Outbox_eventos conserva sobres de eventos asociados al agregado. UUID en uniqueidentifier; peso decimal(11,3); estados y rangos con CHECK; claves foráneas; índices de parcela y eventos pendientes.
 
-Todas las entidades usan UUID. Las relaciones usan claves foráneas; una alerta referencia la evaluación y su mismo lote.
-PostgreSQL conserva instantes de registro con TIMESTAMPTZ. La fecha de cosecha es una fecha de calendario.
-Peso usa NUMERIC(11,3); probabilidades y medidas del simulador usan DOUBLE PRECISION, con límites y rechazo de NaN.
-No se borran lotes con registros hijos por cascada automática. El prototipo no expone borrado.
+Parcelas incluye propietario_subject vinculado al `sub` OIDC. No se almacenan contraseñas en estas tablas: las administra Keycloak. No hay migración de datos desde PostgreSQL en esta entrega.
 
-La parcela inicial contiene sólo una referencia ficticia de productor. No modela polígonos, historial de titularidad ni EUDR.
-La base central todavía no es el esquema completo de todos los RF.
+Una alerta referencia una evaluación de riesgo y permite una decisión final con motivo/instrucción, responsable, instante y operacion_id. `sp_revisar_alerta` actualiza solo PENDIENTE y detecta competencia con THROW 51001; el adaptador lo traduce a conflicto. Negocio y outbox participan en la misma transacción de Spring.
 
-## Evolución prevista, sin crear tablas vacías como si estuvieran implementadas
-
-- Identidad: perfil enlazado al subject OIDC y pertenencia a parcela/cooperativa.
-- Producción: procesamiento, mermas, humedad y genealogía de consolidaciones con peso aportado.
-- Calidad: ficha física y sensorial completa, actor y auditoría.
-- Logística: despacho, checkpoints, incidentes, recepción y firma.
-- Telemetría: mediciones con sensor, instante, unidad y relación con envío.
-- IA: modelo/versiones, variables usadas, inferencias y revisión humana.
-- Pasaporte: certificado, firma, versión y consulta pública limitada por QR.
-
-No almacenar contraseñas de Keycloak en tablas de negocio. No sustituir trazabilidad por un único campo de texto JSON sin relaciones.
+Los scripts 00..03 no eliminan tablas existentes. CREATE OR ALTER actualiza procedimientos; para cambios futuros de columnas se deberán crear migraciones incrementales. Tablas sensoriales, transporte, sesiones móviles, auditoría general y cooperativas múltiples aún no están modeladas. No asumir que este esquema es la base de datos definitiva del informe.

@@ -1,11 +1,9 @@
-# Referencias
+# Referencias primarias
 
-- Documentos del docente aportados por el equipo: S9-Guía práctica-Codigo-Hexa.docx y ALCANCE TÉCNICO DEL PROYECTO.docx.
-- Requisitos e informe de trazabilidad del café aportados previamente por el equipo.
-- Puertos y adaptadores: https://alistair.cockburn.us/hexagonal-architecture
-- Spring Boot: https://docs.spring.io/spring-boot/reference/
-- Eventos y publicación confiable: https://docs.spring.io/spring-modulith/reference/events.html
-- Flutter offline: https://docs.flutter.dev/app-architecture/design-patterns/offline-first
-- PostgreSQL procedimientos: https://www.postgresql.org/docs/current/sql-createprocedure.html
+- Spring: scopes y singleton por contexto: https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html
+- Microsoft: JDBC y procedimientos: https://learn.microsoft.com/en-us/sql/connect/jdbc/using-statements-with-stored-procedures?view=sql-server-ver17
+- Microsoft: SQL Server en Docker: https://learn.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver17
+- Keycloak JavaScript adapter: https://www.keycloak.org/securing-apps/javascript-adapter
+- XGBoost: modelos JSON e interfaz Python: https://xgboost.readthedocs.io/en/stable/python/python_api.html
 
-No se copiaron los ejemplos médicos/universitarios como dominio de negocio. El incremento utiliza cosecha, calidad y riesgo del café.
+Estas referencias explican mecanismos técnicos, no validan un modelo agronómico ni sustituyen los criterios de tu informe.

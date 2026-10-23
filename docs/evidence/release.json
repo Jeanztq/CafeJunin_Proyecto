@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "verifiedAt": "2026-10-23T00:26:53.600734+00:00",
+  "jarSha256": "f9f76a13eb2102ec321764587dbc2d81a9abb12e92413814aef1dbf1538bed16",
+  "java": {
+    "passed": 19,
+    "skippedSqlServer": 1
+  },
+  "reactPassed": 4,
+  "pythonPassed": 1,
+  "httpIntegration": "PASS",
+  "sqlServerLive": "NOT_RUN",
+  "keycloakLive": "NOT_RUN",
+  "flutterBuild": "NOT_RUN"
+}

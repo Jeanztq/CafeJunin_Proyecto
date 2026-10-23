@@ -1,39 +1,22 @@
-# Casos de uso implementados
+# Criterios de aceptación del incremento
 
-## UC01 — Registrar cosecha (avance de HU05)
+Convención: GIVEN–WHEN–THEN (Dado–Cuando–Entonces).
 
-Actor: Productor. Entrada: UUID estable del lote, parcela, fecha, variedad, tipo de recolección y peso.
-Flujo: validar dominio → abrir unidad de trabajo → comprobar reintento → comprobar parcela → guardar lote → encolar evento → confirmar.
-Resultado: lote y CosechaRegistrada. HTTP 201. Un reintento idéntico también devuelve 201, conservando el mismo lote.
+| Caso | GIVEN | WHEN | THEN |
+|---|---|---|---|
+| Acceso central | Cuenta con rol y token válido | Solicita una operación | Se verifican permisos de cuenta en servidor |
+| Propiedad | Productor y parcela de otra cuenta | Registra una cosecha | 403 sin guardar |
+| Cosecha | Parcela propia y campos válidos | Guarda | Lote y evento atómicos |
+| Reintento cosecha | UUID ya registrado con idénticos datos | Reenvía | Un solo lote y evento |
+| Conflicto cosecha | UUID existente con otro peso | Reenvía | 409 sin sobrescribir |
+| Calidad | Catador y lote existente | Registra defectos/puntaje válidos | Evaluación y evento asociados al lote |
+| Umbral IA | Predictor devuelve exactamente 0.70 | Evalúa | No genera alerta |
+| Umbral IA | Predictor devuelve 0.7001 | Evalúa | Genera alerta PENDIENTE y evento |
+| Caída IA | Servicio no disponible | Evalúa | 503 y ninguna evaluación nueva |
+| Confirmación | Supervisor y alerta pendiente | Confirma con motivo e instrucción | CONFIRMADA, responsable, instante y evento |
+| Descarte | Supervisor y alerta pendiente | Descarta con motivo | DESCARTADA sin instrucción correctiva |
+| Reintento revisión | Operación/contenido/responsable idénticos | Reenvía decisión | Mismo resultado y un solo evento |
+| Revisión final | Alerta ya decidida | Intenta cambiar decisión | 409 |
+| Atomicidad | Repositorio de eventos falla | Guarda operación | Se revierte el cambio de negocio |
 
-- Given: parcela existente y datos válidos. When: se registra la cosecha. Then: existe un lote y un evento pendiente.
-- Given: un UUID ya registrado con los mismos datos. When: se reenvía. Then: no se duplican lote ni evento.
-- Given: un UUID ya registrado con otro peso. When: se reenvía. Then: se responde 409 sin sobrescribir.
-- Given: peso cero o fecha futura. When: se intenta registrar. Then: se responde 400 y no se persiste.
-- Given: parcela inexistente. When: se registra. Then: se responde 404.
-
-La deduplicación actual no es una solución completa de sincronización offline. Dos primeras inserciones concurrentes pueden producir un 409 por la PK; el cliente debe consultar/reintentar, conservando el UUID y contenido originales.
-
-## UC02 — Registrar evaluación de calidad (avance de HU08)
-
-Actor: Catador. Entrada: lote, defectos primarios/secundarios y puntaje SCA final.
-Flujo: validar rangos → comprobar lote → persistir evaluación y evento en una transacción.
-Resultado: evaluación y EvaluacionCalidadRegistrada. HTTP 201.
-
-- Given: lote existente y puntaje 85. When: el catador registra la evaluación. Then: se conserva la evaluación asociada al lote.
-- Given: puntaje mayor que 100 o defectos negativos. When: se envía. Then: se responde 400.
-- Given: lote inexistente. When: se evalúa. Then: se responde 404 sin crear registros.
-
-Pendiente de HU08: atributos sensoriales detallados, identidad del catador y ficha completa. Cada POST válido crea una evaluación nueva; no reintentar automáticamente sin implementar antes idempotencia.
-
-## UC03 — Evaluar riesgo (avance de HU16/HU17)
-
-Actor: Supervisor, que solicita la evaluación en el prototipo. En la solución completa podrá dispararse por telemetría.
-Entrada: lote, humedad y horas de demora. Flujo: comprobar datos/lote → llamar al puerto de predicción → guardar evaluación → crear alerta si probabilidad >0.70 → encolar eventos → confirmar.
-Resultado: evaluación etiquetada como simulada y, si corresponde, alerta PENDIENTE.
-
-- Given: predictor responde exactamente 0.70. When: se evalúa. Then: no se crea alerta.
-- Given: predictor responde 0.7001. When: se evalúa. Then: se crea alerta pendiente.
-- Given: falla la persistencia de un evento. When: se ejecuta el caso. Then: se revierte la unidad de trabajo.
-
-El simulador no constituye IA real, no fue entrenado y no completa HU16. No hay notificaciones inmediatas, confirmación humana ni corrección logística implementadas.
+La ficha de calidad completa, la telemetría y las notificaciones en tiempo real no se incluyen en este incremento. La deduplicación de cosecha todavía no resuelve por sí sola todos los conflictos offline.

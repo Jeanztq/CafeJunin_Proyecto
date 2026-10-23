@@ -1,13 +1,5 @@
-# Guion de video sugerido (5–10 minutos)
+# Recorrido de demostración
 
-1. Mostrar carpetas, puertos y dominio sin anotaciones Spring.
-2. Mostrar inyección de dependencias y adaptación MemoryStore/PostgresStore.
-3. Ejecutar `mvn verify`; explicar pruebas del umbral de 70 %, rollback e idempotencia.
-4. Abrir la web local y registrar cosecha con la parcela ficticia.
-5. Registrar evaluación de calidad para ese lote.
-6. Ejecutar riesgo con humedad 22 y demora 12, indicando claramente que es simulación.
-7. Consultar alerta pendiente. Explicar que no se envió una notificación real.
-8. Para la evidencia de BD real, usar perfil postgres, consultar tablas/outbox y reiniciar para demostrar persistencia.
-9. Mostrar diferencias con el producto final: móvil offline, IA real, login de clientes, Kafka y QR aún pendientes.
+Inicia INICIAR-DEMO.cmd. En Cosecha elige parcela, fecha pasada, variedad y peso. En Lotes abre su detalle. En Calidad guarda puntaje 85, cero defectos primarios y dos secundarios. En Riesgo IA usa humedad ambiental 95 y demora 60; el simulador local genera alerta. En Alertas confirma con motivo e instrucción y revisa el detalle del lote. Para mostrar XGBoost, inicia ai-service y cambia PREDICTOR_MODE=xgboost con la misma clave. Indica explícitamente que los datos del modelo son sintéticos.
 
-Guarde capturas o enlaces de su grabación en `docs/evidencias`. Esta carpeta no contiene evidencias inventadas.
+Para demostrar separación de actores utiliza Keycloak real con seguridad activa; la demo combinada no sirve como evidencia de login. Reinicia con SQL Server para conservar registros y probar persistencia.

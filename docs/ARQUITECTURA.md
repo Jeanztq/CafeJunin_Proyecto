@@ -1,56 +1,32 @@
-# Decisiones de arquitectura
+# Arquitectura y patrones
 
-## Límites
+El núcleo `domain` y `application` no importa Spring, JDBC ni adaptadores. Los casos de uso dependen de puertos; `infrastructure/configuration` conecta sus implementaciones. Una prueba verifica esa independencia. React y Flutter son clientes separados del mismo backend, con una identidad central prevista para ambos. El móvil aún no autentica ni sincroniza.
 
-Backend modular desplegado como una aplicación. El incremento 1 comparte paquetes por capa; al crecer,
-se agruparán esas mismas capas dentro de los módulos cosecha, calidad, logística y riesgo.
-El dominio y aplicación no importan Spring, JDBC ni adaptadores. Spring se limita a infraestructura y adaptadores.
-Los puertos de entrada definen las operaciones; los casos de uso los implementan. Los puertos de salida abstraen persistencia, transacciones y predicción.
-
-```mermaid
-flowchart TD
- W[Web] --> R[Adaptador REST]
- M[Móvil futuro] --> R
- R --> I[Puertos de entrada]
- I --> C[Casos de uso y dominio]
- C --> O[Puertos de salida]
- O --> P[Adaptador PostgreSQL]
- O --> S[Simulador de predicción]
- P --> D[(PostgreSQL y outbox)]
-```
-
-Las flechas muestran ejecución. Las dependencias de código siempre apuntan al núcleo: los adaptadores implementan interfaces internas.
-
-## Cinco patrones requeridos
-
-| Patrón | Evidencia | Justificación |
+| Patrón | Implementación | Propósito |
 |---|---|---|
-| Repository | application/ports/output/*RepositoryPort | Los casos de uso no conocen el almacenamiento |
-| Dependency Injection | infrastructure/configuration/BeansConfiguration y constructores | Spring conecta implementaciones; el núcleo puede probarse con Java puro |
-| Factory Method | domain/factory/EventoFactory | Los creadores Cosecha, Calidad, Riesgo y RiesgoAlto sobrescriben el método fábrica que crea distintos productos EventoDominio |
-| Strategy | PrediccionRiesgoPort y SimuladorRiesgoAdapter | El caso de uso recibe el comportamiento de predicción; en pruebas se sustituye por estrategias del umbral y posteriormente podrá usarse un modelo real |
-| Adapter | TrazabilidadController, PostgresStore, MemoryStore | Traducen HTTP y persistencia a los contratos del núcleo |
+| Adapter | TrazabilidadController, SqlServerStore, CuentaSpringAdapter, HttpXgboostAdapter | Traducir HTTP/JWT/JDBC/IA hacia los contratos del núcleo |
+| Facade | PortalFacade implementa PortalUseCase | Presentar operaciones del portal y aplicar roles/pertenencia; delegar reglas a casos de uso |
+| Decorator | MedicionPrediccionDecorator | Contar llamadas, fallos y tiempo del predictor sin cambiarlo ni reintentar |
+| Factory Method | EventoFactory y sus creadores concretos | Construir sobres de eventos por operación |
+| Simple Factory | PredictorFactory | Elegir reglas o adaptador XGBoost según configuración |
+| Builder | LoteBuilder | Construir un lote validado desde el contrato de entrada |
+| Singleton administrado | Beans de Spring, incluido el predictor decorado | Una instancia por bean/contexto, con inyección; no es un singleton global de JVM |
+| Repository | LoteRepositoryPort, CalidadRepositoryPort, RiesgoRepositoryPort | Independizar la lógica de memoria o SQL Server |
+| Strategy | PrediccionRiesgoPort | Intercambiar algoritmos/adaptadores sin modificar el caso de uso |
+| Dependency Injection | BeansConfiguration | Componer servicios y adaptadores explícitamente |
 
-No se mantiene una conexión JDBC global: Spring administra DataSource y su pool.
-Las validaciones HTTP no sustituyen las reglas del dominio; ambos niveles rechazan datos inválidos.
+Factory no crea procedimientos almacenados. Los procedimientos se definen en T-SQL; SqlServerStore los invoca mediante JDBC. Los repositorios y el pool se comparten; cada Builder se crea para una operación.
 
-## Eventos y consistencia
+## Eventos dentro de hexagonal
 
-El estado, la alerta y los eventos se escriben dentro de la misma unidad de trabajo.
-PostgresStore utiliza TransactionTemplate; MemoryStore conserva una instantánea para revertir errores durante la demostración.
-`outbox_eventos` guarda sobres con eventId, tipo, aggregateId, occurredAt y versión. No guarda una instantánea completa del negocio.
+Cada escritura de negocio y su sobre de evento se guardan en la misma unidad de trabajo. En SQL Server participa TransactionTemplate; en memoria se usa snapshot y rollback sincronizado. El servicio de predicción se llama antes de abrir la transacción para evitar mantener bloqueos mientras se espera HTTP.
 
-**No hay broker, consumidor ni publicador implementado.** El registro pendiente es la base para incorporar publicación confiable,
-pero no demuestra todavía EDA distribuida ni satisface el requisito completo de Kafka.
-Antes de integrar Kafka: definir payload versionado, orden por lote, reintentos, política de fallos e idempotencia del consumidor.
-El publicador deberá marcar PUBLICADO sólo después del ACK del broker, admitiendo entrega repetida.
+Outbox almacena identificador, tipo, agregado, instante y versión; no el contenido completo del evento. Aún no tiene publicador, broker, confirmación de envío, consumidores, reintentos durables ni deduplicación de consumidores. Por ello esta entrega incorpora la base transaccional para eventos, no una arquitectura distribuida event driven completa. Antes de añadir consumidores se deben versionar payloads y su política de entrega. No se introduce Kafka solo por tener cliente móvil.
 
-## Identidad
+## Acceso y límites
 
-Modo local: sin login, menú de demostración sin asignación de permisos.
-Modo OIDC: JWT validado y roles del realm de Keycloak; exige configurar issuer-uri y un servidor real.
-Reglas de pertenencia a parcelas/lotes aún pendientes: un token de productor no limita hoy los datos a su propietario.
-No se presenta esta configuración como autorización completa ni como entorno productivo.
+Con seguridad activa, JWT verificado → CuentaActualPort → Facade → caso de uso → repositorios/eventos. El productor solo consulta y registra en sus parcelas. Supervisor/catador operan sobre los lotes del piloto de una cooperativa. No hay aislamiento entre múltiples cooperativas implementado. El transportista no ve lotes hasta implementar sus asignaciones. La UI oculta módulos y el servidor vuelve a verificar permisos.
 
-Usuario es el actor general del modelo. Los roles especializados son Productor, Catador, Transportista, Supervisor y Consumidor.
-El consumidor accederá a una vista pública QR aún pendiente; no debe recibir acceso al listado interno de lotes.
+React usa Keycloak con PKCE y token en memoria. No se guardan tokens en localStorage. Cambios de rol efectivos al renovar sesión/token. La demo desactiva autenticación explícitamente y solo escucha loopback por defecto; el modo de demostración no satisface autenticación real.
+
+No usar herencia de clases para representar permisos por obligación del diagrama: Usuario es el actor general; las especialidades se expresan como roles de cuenta. Una cuenta puede tener varios roles autorizados y se muestra la unión de módulos.

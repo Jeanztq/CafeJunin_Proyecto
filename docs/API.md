@@ -1,50 +1,26 @@
-# Contrato REST del incremento 1
+# API 0.2
 
-Base local: `http://localhost:8080/api`. JSON UTF-8. Ver ejemplos en `scripts/Demostrar-API.ps1`.
+Base `/api`. JSON. Seguridad activa: Bearer JWT salvo config/info. Las operaciones verifican rol y pertenencia en PortalFacade.
 
-| Método | Ruta | Respuesta | Rol cuando OIDC está activo |
-|---|---|---|---|
-| GET | /info | 200, estado del prototipo | Público, sin datos del negocio |
-| POST | /lotes | 201, lote | PRODUCTOR |
-| GET | /lotes | 200, lista | PRODUCTOR, CATADOR, SUPERVISOR, TRANSPORTISTA |
-| POST | /lotes/{uuid}/evaluaciones | 201, evaluación | CATADOR |
-| POST | /lotes/{uuid}/riesgos | 201, predicción simulada | SUPERVISOR |
-| GET | /alertas | 200, lista | SUPERVISOR |
+| Método/ruta | Operación |
+|---|---|
+| GET /config, /info | Configuración pública del cliente y modo de ejecución; sin secretos |
+| GET /me | Identidad y roles de la cuenta actual |
+| GET /parcelas | Parcelas autorizadas |
+| GET /lotes | Lotes autorizados |
+| POST /lotes | Productor: cosecha |
+| GET /lotes/{id}/detalle | Lote, calidad y, solo supervisor, riesgos/alertas |
+| POST /lotes/{id}/evaluaciones | Catador: registro básico de calidad |
+| POST /lotes/{id}/riesgos | Supervisor: llamar predictor y guardar riesgo |
+| GET /alertas | Supervisor: alertas |
+| PUT /alertas/{id}/decision | Supervisor: confirmar/descartar |
 
-## Registrar lote
+Cosecha: `id` UUID estable, `parcelaId` UUID, `fechaCosecha` YYYY-MM-DD, `variedad` TYPICA/GEISHA/BOURBON/CATIMOR, `tipoRecoleccion` SELECTIVA/GENERAL, `pesoKg` >0 con hasta tres decimales y ocho enteros. La fecha no puede ser futura. Un reintento idéntico devuelve 201 sin duplicar lote/evento; el mismo UUID con otro contenido devuelve 409.
 
-```json
-{"id":"22222222-2222-2222-2222-222222222222","parcelaId":"11111111-1111-1111-1111-111111111111","fechaCosecha":"2025-01-01","variedad":"BOURBON","tipoRecoleccion":"SELECTIVA","pesoKg":120.5}
-```
+Calidad: `defectosPrimarios`, `defectosSecundarios` enteros no negativos y `puntajeSca` 0..100. El servidor asigna el UUID. No es idempotente; no reintentar automáticamente tras una respuesta incierta. No es la ficha sensorial completa.
 
-## Evaluar calidad
+Riesgo: `humedad` 0..100 (relativa ambiental, no del grano), `horasDemora` >=0. Respuesta: `id,loteId,humedad,horasDemora,probabilidad:{valor},modelo,simulada`. Solo si `probabilidad.valor>0.70` se guarda una alerta. Cada solicitud crea una evaluación; no tiene clave idempotente.
 
-```json
-{"defectosPrimarios":0,"defectosSecundarios":2,"puntajeSca":85}
-```
+Decisión: `operacionId` UUID estable, `estado` CONFIRMADA/DESCARTADA, `motivo` 5..1000 caracteres, `instruccion` 5..1000 al confirmar; null/vacía al descartar. Estado final inmutable. Exacto reintento con misma operación/contenido/responsable devuelve la misma decisión; cualquier otro intento final devuelve 409. Se registra el subject del supervisor y la hora del servidor.
 
-## Evaluar riesgo
-
-```json
-{"humedad":22,"horasDemora":12}
-```
-
-Probabilidad se expresa entre 0 y 1. `simulada:true` y `modelo:SIMULADOR-REGLAS-v1` identifican el mock.
-En el lote de respuesta, peso aparece como `peso.kilogramos`. UUID, fechas y enumeraciones son obligatorios.
-Errores: 400 entrada inválida, 404 referencia inexistente, 409 conflicto. OIDC añade 401/403.
-No hay paginación, API pública QR ni especificación OpenAPI generada todavía.
-
-## Activación OIDC — integración pendiente con su realm
-
-Configure un realm Keycloak con roles PRODUCTOR, CATADOR, SUPERVISOR y TRANSPORTISTA.
-Antes de arrancar desde la consola:
-
-```powershell
-$env:SECURITY_ENABLED='true'
-$env:SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI='https://su-servidor/realms/cafejunin'
-```
-
-Consuma la API con `Authorization: Bearer <access_token>` obtenido mediante el flujo de su cliente OIDC.
-El servidor debe ser accesible y emitir tokens válidos. No se suministra un realm ni usuarios reales.
-La demo HTML no implementa ese flujo; con seguridad activa su acceso se deniega.
-Queda pendiente validar audiencia del token, propiedad de recursos, MFA y demás controles del informe.
+Errores: 400 datos inválidos, 401 token ausente/inválido, 403 acceso no autorizado, 404 inexistente, 409 conflicto, 503 predictor/persistencia no disponible. Errores de aplicación: `{estado,mensaje}`. Los 401/403 del filtro pueden tener cuerpo vacío.

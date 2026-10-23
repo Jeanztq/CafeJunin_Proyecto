@@ -1,0 +1,14 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> cafejunin-portal@0.2.0 test
+> vitest run
+
+
+ RUN  v5.0.5 /workspace/scratch/559bd857bcef/work/CafeJuninV2/web
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  19:25:34
+   Duration  843ms (environment 37%, tests 30%, import 19%, transform 13%, worker 1%)
+

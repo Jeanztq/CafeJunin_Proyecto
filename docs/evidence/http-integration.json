@@ -1,0 +1,12 @@
+{
+  "backend": "Spring Boot + memoria",
+  "predictor": "FastAPI + XGBoost con datos sintéticos",
+  "checks": [
+    "React servido desde JAR",
+    "Cosecha persistida; reintento no duplica",
+    "Predicción real por HTTP; modelo marcado sintético",
+    "Revisión humana, idempotencia y conflicto de decisión",
+    "Servicio IA caído: 503 sin evaluación ni alerta adicional"
+  ],
+  "status": "PASS"
+}

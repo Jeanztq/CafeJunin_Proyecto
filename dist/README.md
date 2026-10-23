@@ -1,8 +1,5 @@
-# Ejecutable de demostración
+# Ejecutable 0.2
 
-`cafejunin-backend-0.1.0.jar` fue generado con Maven y JDK 17 desde el backend de esta entrega.
+`java -jar cafejunin-backend-0.2.0.jar --spring.profiles.active=memory`
 
-Requiere Java 17. Desde la raíz: `java -jar dist/cafejunin-backend-0.1.0.jar --spring.profiles.active=memory`.
-
-Para reconstruir después de editar: `cd backend`, `mvn verify` y copiar `target/cafejunin-backend-0.1.0.jar` a esta carpeta.
-Los JAR en dist están ignorados por Git para versionar el código fuente, no los binarios.
+Requiere JDK17. Incluye React compilado. Abre http://localhost:8080. Demo sin autenticación, memoria volátil y predictor de reglas por defecto. Para SQL Server/Keycloak/XGBoost consulta docs/CONEXIONES.md. Recompilar mediante scripts/Compilar.ps1 después de editar.

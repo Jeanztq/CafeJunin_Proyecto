@@ -6,6 +6,11 @@
 **/.env
 **/.env.*
 !**/.env.example
+tests/sqlite_campo/.dart_tool/
+tests/sqlite_campo/build/
+tests/sqlite_campo/.flutter-plugins-dependencies
+mobile/.flutter-plugins-dependencies
+mobile/android/*.iml
 mobile/.dart_tool/
 mobile/build/
 mobile/android/local.properties

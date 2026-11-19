@@ -1,5 +1,8 @@
 $ErrorActionPreference = 'Stop'
 $base = 'http://localhost:8080/api'
+if ((Invoke-RestMethod "$base/config").seguridadActiva) {
+    throw 'Este recorrido automatizado usa el operador local. Para probarlo, inicie INICIAR-CAFE-JUNIN.cmd -OperadorLocal.'
+}
 $id = [guid]::NewGuid().ToString()
 $body = @{id=$id;parcelaId='11111111-1111-1111-1111-111111111111';fechaCosecha='2025-01-01';variedad='BOURBON';tipoRecoleccion='SELECTIVA';pesoKg=120.5} | ConvertTo-Json
 Invoke-RestMethod "$base/lotes" -Method Post -ContentType 'application/json' -Body $body

@@ -1,7 +1,16 @@
-# Flutter · captura preliminar offline
+# Café Junín · Campo
 
-Código Dart para formulario de cosecha y persistencia de borradores en SQLite local con UUID estable. Sin autenticación, cifrado ni sincronización. No es todavía una app conectada al sistema.
+HU05 cubre el registro de cosecha del productor en campo. La aplicación Android guarda un borrador con UUID, parcela, fecha, variedad, recolección y peso en SQLite. Al terminar la escritura muestra el comprobante. El productor puede volver al formulario y abrir cualquier registro desde **Cosechas guardadas**. Una operación fallida conserva los datos del formulario para corregirlos o reintentar.
 
-En un equipo con Flutter instalado, desde `mobile`: `flutter create --platforms=android,ios --project-name cafejunin_mobile .`, `flutter pub get`, `flutter analyze`, `flutter run`. Revisa los archivos generados y los requisitos de Android/iOS. El proyecto se entrega sin carpetas nativas generadas. No hay SDK Flutter en el entorno de entrega: no se compiló ni se probó en emulador/dispositivo.
+## Ejecutar
 
-Siguiente incremento: OIDC con navegador del sistema/PKCE, tokens en almacenamiento seguro, vínculo de parcela por cuenta, base cifrada y cola de sincronización con ACK/conflictos. No enviar borradores de una cuenta con credenciales de otra. No usar datos sensibles mientras no se completen estos controles.
+Desde esta carpeta, con Flutter 3.50, Android SDK y un dispositivo o emulador disponible:
+
+```sh
+flutter pub get
+flutter analyze
+flutter test
+flutter run
+```
+
+La prueba de persistencia en Windows se ejecuta con `flutter test` desde **tests/sqlite_campo**. Allí se instala el adaptador SQLite de escritorio para la prueba. El proyecto Android está en **android/**. Se verificaron el análisis estático, el paquete de depuración de Flutter y dos pruebas que cubren el comprobante, el reintento y la recuperación de datos al reabrir SQLite. El formulario acepta el identificador de una parcela. Todavía faltan la cuenta móvil con OIDC, la selección de parcelas asignadas, el cifrado local y el envío al backend con confirmación. Los borradores permanecen en este dispositivo. HU08, el riesgo y la revisión del supervisor se atienden desde el portal.

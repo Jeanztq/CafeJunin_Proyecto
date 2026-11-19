@@ -1,9 +1,7 @@
 @echo off
 setlocal
-cd /d "%~dp0"
-if not exist "dist\cafejunin-backend-0.2.0.jar" (
-  echo Primero ejecute scripts\Compilar.ps1.
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File "%~dp0scripts\Iniciar-Portal.ps1" %*
+if errorlevel 1 (
+  pause
   exit /b 1
 )
-java -jar "dist\cafejunin-backend-0.2.0.jar" %*
-if errorlevel 1 pause

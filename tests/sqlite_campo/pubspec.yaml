@@ -1,0 +1,10 @@
+name: pruebas_sqlite_campo
+publish_to: none
+environment:
+  sdk: ^3.14.0
+dev_dependencies:
+  cafejunin_mobile:
+    path: ../../mobile
+  flutter_test:
+    sdk: flutter
+  sqflite_common_ffi: ^2.4.7

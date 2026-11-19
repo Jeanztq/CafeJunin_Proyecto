@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(properties = "app.security.enabled=true")
+@SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("memory")
 class SecurityTest {

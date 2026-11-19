@@ -1,4 +1,6 @@
-# Conexiones locales pendientes
+# Conexiones de Café Junín
+
+Para usar cuentas individuales con H2 basta el lanzador de Windows. Reutiliza el Keycloak de **infra** con su volumen e inicia únicamente el servicio de identidad. La primera descarga de la imagen requiere internet. La configuración de los demás servicios se describe a continuación.
 
 ## SQL Server, Keycloak y XGBoost con Docker
 
@@ -39,7 +41,7 @@ Se puede probar Keycloak o XGBoost manteniendo memoria: usa los mismos parámetr
 
 Realm `cafejunin`, cliente público `cafejunin-web`, autorización con PKCE S256. El backend valida firma, issuer, expiración y audiencia `cafejunin-api`; lee roles del token. La aplicación no permite elegir privilegios desde una lista antes de autenticar.
 
-Usuarios: `productor`, `catador`, `supervisor`, `transportista`. Contraseña inicial de laboratorio: `CafeJunin-Local-2026!`. Todos son ficticios. Cambia las contraseñas antes de compartir cualquier entorno. Catador y supervisor tienen requerida la configuración de TOTP; al primer acceso Keycloak pedirá registrar un autenticador. Este recorrido con Keycloak aún debe verificarse en tu PC.
+Usuarios: `productor`, `catador`, `supervisor`, `transportista`. Contraseña inicial de laboratorio: `CafeJunin-Local-2026!`. Todos son ficticios. Cambia las contraseñas antes de compartir cualquier entorno. Catador y supervisor tienen requerida la configuración de TOTP; al primer acceso Keycloak pedirá registrar un autenticador. Se verificaron el ingreso y la salida de las cuatro cuentas y el alta de TOTP en un realm temporal importado en Keycloak 26.4.0. Cada instalación registra sus propios autenticadores.
 
 La parcela `22222222-2222-2222-2222-222222222222` pertenece al UUID del productor de prueba. La parcela `1111…` pertenece a la identidad operador-local. Si creas otra cuenta, vincula `propietario_subject` de la parcela al `sub` real de esa cuenta; no al nombre de usuario. Catador y supervisor tienen acceso a los lotes de una sola cooperativa. Transporte todavía no tiene asignaciones implementadas. Consumidor no necesita una cuenta para el futuro QR público; ese flujo sigue pendiente.
 
@@ -85,4 +87,4 @@ git remote add origin https://github.com/TU_CUENTA/TU_REPOSITORIO.git
 git push -u origin main
 ```
 
-No se ha ejecutado push. CI valida Java/React/Python; no prueba Keycloak, Flutter ni SQL Server automáticamente. El `.gitignore` excluye archivos `.env`, dependencias instaladas y compilaciones temporales. El modelo sintético y el JAR de entrega son artefactos explícitos; puedes distribuir el JAR en Releases en lugar de versionarlo.
+No se ha ejecutado push. CI valida Java, React y Python. Las comprobaciones de Keycloak en Edge, Flutter y SQL Server se ejecutan por separado. El `.gitignore` excluye archivos `.env`, dependencias instaladas y compilaciones temporales. El modelo sintético y el JAR de entrega son artefactos explícitos; puedes distribuir el JAR en Releases en lugar de versionarlo.

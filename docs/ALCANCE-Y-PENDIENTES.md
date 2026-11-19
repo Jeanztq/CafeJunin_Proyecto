@@ -13,8 +13,8 @@ La entrega final se centra en HU08. La tabla distingue su implementación de las
 | Revisión / HU18 | Confirmar/descartar, motivo, instrucción, autor y auditoría de decisión | Entrega y ejecución de instrucción al transportista |
 | Portal React | Navegación por permisos y recorrido integrado probado | Resto de módulos y auditoría de accesibilidad |
 | SQL Server | Esquema y procedimientos HU08 probados en SQL Express | Verificar el adaptador JDBC con credenciales del despliegue, backups y permisos mínimos |
-| Identidad | Cliente OIDC PKCE, JWT issuer/audiencia, realm y TOTP requeridos | Verificar login/logout/MFA con Keycloak real |
-| Flutter | Código de borradores SQLite offline | SDK, compilación, pruebas físicas, OIDC, cifrado, ACK, sincronización/conflictos |
+| Identidad | Login y logout con Keycloak real por rol, PKCE, JWT y TOTP para catador y supervisor | Configurar y verificar el proveedor, HTTPS y usuarios del despliegue |
+| Flutter | Captura, confirmación y consulta local de borradores en Flutter para Android | APK y prueba en dispositivo, OIDC, cifrado, ACK y sincronización por cuenta |
 | Eventos | Consumidor local HU08, outbox atómico y línea de tiempo del lote por rol | Publicación a un broker externo |
 | GitHub | Scripts Git y workflow CI | Elegir repositorio y realizar push |
 | Transporte y procesamiento | Pendiente | Asignaciones, recepción, consolidación, evidencias y telemetría |
@@ -22,7 +22,7 @@ La entrega final se centra en HU08. La tabla distingue su implementación de las
 
 ## Secuencia de trabajo
 
-1. Conectar SQL Server y Keycloak en tu equipo y ejecutar sus verificaciones. Confirmar la matriz de historias del informe para cerrar el alcance de entrega.
+1. Verificar SQL Server y configurar Keycloak con las cuentas y los dominios del despliegue. Confirmar la matriz de historias del informe para cerrar el alcance de entrega.
 2. Completar las funciones web restantes Must/Should antes de ampliar a módulos futuros.
 3. Compilar Flutter y completar inicio de sesión, cifrado local y sincronización idempotente. El backend será el mismo; no crear otro sistema por actor.
 4. Incorporar datos reales de riesgo y validar el modelo; luego transporte, notificaciones y automatización de eventos según el alcance confirmado.

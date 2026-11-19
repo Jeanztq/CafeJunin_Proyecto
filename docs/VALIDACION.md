@@ -20,8 +20,8 @@ El JAR de `dist` incluye el portal compilado. El modelo incluido tiene ficha de 
 ## Alcance de las pruebas de infraestructura
 
 - El ensayo de procedimientos de HU08 usa SQL Express real. La suite JDBC optativa se habilita mediante RUN_SQLSERVER_TESTS y las variables de conexión indicadas en CONEXIONES.md.
-- Keycloak: realm, TOTP requerido, cliente PKCE y validación JWT implementados. Las pruebas HTTP usan JWT de prueba; no verifican un login interactivo, MFA ni logout contra un servidor Keycloak real.
-- Flutter: sin SDK disponible. Código de borradores SQLite entregado, sin compilación, emulador ni prueba física. No hay integración móvil autenticada ni sincronización.
+- Identidad. En Edge se verificaron el ingreso y la salida del productor, catador, supervisor y transportista contra un realm aislado importado en Keycloak 26.4.0. El catador y el supervisor registraron y usaron TOTP. Se comprobó el menú de cada rol y el registro de cosecha desde la cuenta del productor. En Windows también se verificaron los dos modos del lanzador y la respuesta 401 sin sesión en el modo habitual.
+- Flutter. Se comprobó la captura y consulta del comprobante local con Flutter 3.50.0. Pasaron la prueba de interfaz con reintento y la prueba de reapertura de un archivo SQLite real con el mismo UUID. El análisis estático y la compilación del paquete de recursos y código Dart pasaron. La instalación de un APK y las pruebas en dispositivo siguen pendientes.
 - Sin evaluación de carga, accesibilidad completa, tolerancia a fallos, backups ni cumplimiento íntegro de RNF. No se desplegó ni publicó en GitHub.
 
 ## Reproducir

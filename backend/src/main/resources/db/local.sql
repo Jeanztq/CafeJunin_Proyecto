@@ -5,6 +5,9 @@ CREATE TABLE IF NOT EXISTS dbo.parcelas (
 INSERT INTO dbo.parcelas (id,nombre,ubicacion,propietario_subject)
 SELECT '11111111-1111-1111-1111-111111111111','El Mirador','Satipo, Junín','operador-local'
 WHERE NOT EXISTS (SELECT 1 FROM dbo.parcelas WHERE id='11111111-1111-1111-1111-111111111111');
+INSERT INTO dbo.parcelas (id,nombre,ubicacion,propietario_subject)
+SELECT '22222222-2222-2222-2222-222222222222','La Esperanza','Satipo, Junín','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1'
+WHERE NOT EXISTS (SELECT 1 FROM dbo.parcelas WHERE id='22222222-2222-2222-2222-222222222222');
 CREATE TABLE IF NOT EXISTS dbo.lotes (
   id UUID PRIMARY KEY, parcela_id UUID NOT NULL REFERENCES dbo.parcelas(id), fecha_cosecha DATE NOT NULL,
   variedad VARCHAR(30) NOT NULL, tipo_recoleccion VARCHAR(30) NOT NULL, peso_kg DECIMAL(11,3) NOT NULL CHECK(peso_kg>0),

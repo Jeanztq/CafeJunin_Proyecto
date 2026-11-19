@@ -15,8 +15,7 @@ public class SecurityConfiguration {
   @Bean
   @ConditionalOnProperty(
       name = "app.security.enabled",
-      havingValue = "false",
-      matchIfMissing = true)
+      havingValue = "false")
   SecurityFilterChain sesionLocal(HttpSecurity http) throws Exception {
     return http.csrf(c -> c.disable())
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

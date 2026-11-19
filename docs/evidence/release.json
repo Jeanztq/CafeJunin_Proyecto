@@ -1,7 +1,7 @@
 {
   "version": "0.2.0",
-  "verifiedAt": "2026-11-19T14:48:40.647109+00:00",
-  "jarSha256": "949254e4fdd86a2986ae8b629c74fff6b5ef0beac2dbc15029f07b1919a41be9",
+  "verifiedAt": "2026-11-19T15:15:30.453270+00:00",
+  "jarSha256": "c85a00fb6dd747016d6dcdc153f63cfd1413ed5372180d5ceadc9b638b813cd9",
   "java": {
     "passed": 21,
     "skippedSqlServer": 1
@@ -10,8 +10,10 @@
   "pythonPassed": 1,
   "httpIntegration": "PASS",
   "sqlServerLive": "TSQL_PASS",
-  "keycloakLive": "NOT_RUN",
-  "flutterBuild": "NOT_RUN",
+  "keycloakLive": "EDGE_LOGIN_LOGOUT_4_ROLES_TOTP_PASS",
+  "flutterBuild": "DEBUG_BUNDLE_PASS",
   "localRestart": "PASS",
-  "browser": "EDGE_PASS"
+  "browser": "EDGE_PASS",
+  "flutterTestsPassed": 2,
+  "androidApk": "NOT_RUN"
 }

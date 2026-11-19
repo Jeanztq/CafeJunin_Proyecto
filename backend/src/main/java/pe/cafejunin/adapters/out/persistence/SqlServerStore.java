@@ -13,7 +13,7 @@ import pe.cafejunin.domain.events.EventoDominio;
 
 public final class SqlServerStore extends JdbcStore {
   public SqlServerStore(JdbcTemplate jdbc, TransactionTemplate tx) {
-    super(jdbc, tx);
+    super(jdbc, tx, ZoneOffset.UTC);
   }
 
   @Override

@@ -52,7 +52,7 @@ public final class EvaluarRiesgoService implements EvaluarRiesgoUseCase {
           riesgos.guardar(evaluacion);
           eventos.agregar(new EventoFactory.Riesgo().crear(loteId, reloj.instant()));
           if (evaluacion.generaAlerta()) {
-            riesgos.guardar(new Alerta(UUID.randomUUID(), loteId, evaluacion.id(), "PENDIENTE"));
+            riesgos.guardar(new Alerta(UUID.randomUUID(), loteId, evaluacion.id(), "PENDIENTE", reloj.instant()));
             eventos.agregar(new EventoFactory.RiesgoAlto().crear(loteId, reloj.instant()));
           }
           return evaluacion;

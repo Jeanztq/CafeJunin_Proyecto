@@ -11,7 +11,7 @@ import pe.cafejunin.domain.events.*;
 
 public final class LocalJdbcStore extends JdbcStore {
   public LocalJdbcStore(JdbcTemplate jdbc, TransactionTemplate tx) {
-    super(jdbc, tx);
+    super(jdbc, tx, java.time.ZoneId.systemDefault());
   }
 
   @Override

@@ -24,6 +24,18 @@ class SecurityTest {
   @Test
   void exigeTokenYRol() throws Exception {
     mvc.perform(get("/api/lotes")).andExpect(status().isUnauthorized());
+    mvc.perform(get("/api/me").with(jwt().authorities(new SimpleGrantedAuthority("ROLE_CATADOR"),
+            new SimpleGrantedAuthority("ROLE_offline_access"))))
+        .andExpect(jsonPath("$.roles.length()").value(1))
+        .andExpect(jsonPath("$.roles[0]").value("CATADOR"));
+    var ruta = "/api/alertas/" + java.util.UUID.randomUUID();
+    mvc.perform(get(ruta)).andExpect(status().isUnauthorized());
+    for (String rol : new String[]{"PRODUCTOR", "CATADOR", "TRANSPORTISTA"}) {
+      mvc.perform(get(ruta).with(jwt().authorities(new SimpleGrantedAuthority("ROLE_" + rol))))
+          .andExpect(status().isForbidden());
+    }
+    mvc.perform(get(ruta).with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
+        .andExpect(status().isNotFound());
     mvc.perform(
             get("/api/alertas")
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_PRODUCTOR"))))

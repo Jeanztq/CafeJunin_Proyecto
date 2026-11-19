@@ -12,9 +12,10 @@ public record Alerta(
     String instruccion,
     String responsable,
     Instant revisadaEn,
-    UUID operacionId) {
-  public Alerta(UUID id, UUID loteId, UUID riesgoId, String estado) {
-    this(id, loteId, riesgoId, estado, null, null, null, null, null);
+    UUID operacionId,
+    Instant registradaEn) {
+  public Alerta(UUID id, UUID loteId, UUID riesgoId, String estado, Instant registradaEn) {
+    this(id, loteId, riesgoId, estado, null, null, null, null, null, registradaEn);
   }
 
   public Alerta revisar(
@@ -47,6 +48,7 @@ public record Alerta(
         instruccion == null ? "" : instruccion.trim(),
         responsable,
         instante,
-        operacion);
+        operacion,
+        registradaEn);
   }
 }

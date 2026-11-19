@@ -68,6 +68,20 @@ class ApiTest {
                 .content("{\"humedad\":95,\"horasDemora\":36}"))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.simulada").value(true));
+    var alerta = memoria.listarAlertas().stream().filter(a -> a.loteId().toString().equals(id))
+        .findFirst().orElseThrow();
+    // Una evaluación posterior del mismo lote no sustituye la evidencia de la alerta.
+    mvc.perform(post("/api/lotes/" + id + "/riesgos").contentType(MediaType.APPLICATION_JSON)
+        .content("{\"humedad\":40,\"horasDemora\":1}")).andExpect(status().isCreated());
+    mvc.perform(get("/api/alertas/" + alerta.id()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.alerta.registradaEn").isString())
+        .andExpect(jsonPath("$.evaluacion.id").value(alerta.evaluacionRiesgoId().toString()))
+        .andExpect(jsonPath("$.evaluacion.humedad").value(95.0))
+        .andExpect(jsonPath("$.evaluacion.horasDemora").value(36.0))
+        .andExpect(jsonPath("$.umbralAlerta").value(0.7))
+        .andExpect(jsonPath("$.lote.id").value(id))
+        .andExpect(jsonPath("$.parcela.id").value("11111111-1111-1111-1111-111111111111"));
     mvc.perform(get("/api/alertas"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].estado").value("PENDIENTE"));

@@ -10,7 +10,12 @@ export async function api(path, options = {}) {
   }
   const response = await fetch(`/api${path}`, { ...options, headers });
   const data = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new Error(data?.mensaje || `Solicitud fallida (${response.status}).`);
+  if (!response.ok) {
+    const error = new Error(
+      data?.mensaje || `Solicitud fallida (${response.status}).`,
+    );
+    error.status = response.status;
+    throw error;
+  }
   return data;
 }

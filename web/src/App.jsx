@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Coffee,
   LayoutDashboard,
   Package,
-  Leaf,
   ClipboardCheck,
   BrainCircuit,
   Bell,
@@ -11,6 +10,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { api } from "./api";
+import Alertas, { porcentaje } from "./Alertas";
 import Calidad, { ResultadoCalidad } from "./Calidad";
 const hitos = {
   CosechaRegistrada: "Cosecha registrada",
@@ -48,18 +48,23 @@ export default function App({ config, identity }) {
     [loading, setLoading] = useState(true),
     [result, setResult] = useState(null);
   const [lotId, setLotId] = useState(() => crypto.randomUUID()),
-    [reviewId, setReviewId] = useState(() => crypto.randomUUID()),
-    [selected, setSelected] = useState(""),
-    [decision, setDecision] = useState("CONFIRMADA");
+    [selected, setSelected] = useState(null);
+  const actualizarAlerta = useCallback((actualizada) => {
+    setAlerts((anteriores) =>
+      anteriores.map((a) => (a.id === actualizada.id ? actualizada : a)),
+    );
+  }, []);
+  const activePage = page === "Cosecha" ? "Lotes" : page;
+  const alertaGenerada =
+    result && alerts.find((a) => a.evaluacionRiesgoId === result.id);
   const can = (role) => account?.roles.includes(role);
   const menus = [
     ["Inicio", LayoutDashboard],
     ["Lotes", Package],
-    ...(can("PRODUCTOR") ? [["Cosecha", Leaf]] : []),
     ...(can("CATADOR") ? [["Calidad", ClipboardCheck]] : []),
     ...(can("SUPERVISOR")
       ? [
-          ["Riesgo IA", BrainCircuit],
+          ["Riesgo", BrainCircuit],
           ["Alertas", Bell],
         ]
       : []),
@@ -75,7 +80,8 @@ export default function App({ config, identity }) {
     setLots(l);
     setParcels(p);
     setAlerts(al);
-    if (inicial && a.roles.includes("CATADOR")) setPage("Calidad");
+    if (inicial && a.roles.length === 1 && a.roles.includes("CATADOR"))
+      setPage("Calidad");
   }
   useEffect(() => {
     if (config.seguridadActiva && !identity?.authenticated) {
@@ -115,6 +121,7 @@ export default function App({ config, identity }) {
         setPage("Lotes");
       }
       if (type === "riesgo") {
+        setResult(null);
         setResult(
           await api(`/lotes/${f.loteId}/riesgos`, {
             method: "POST",
@@ -124,19 +131,6 @@ export default function App({ config, identity }) {
             }),
           }),
         );
-      }
-      if (type === "revision") {
-        await api(`/alertas/${selected}/decision`, {
-          method: "PUT",
-          body: JSON.stringify({
-            operacionId: reviewId,
-            estado: decision,
-            motivo: f.motivo,
-            instruccion: decision === "CONFIRMADA" ? f.instruccion : null,
-          }),
-        });
-        setSelected("");
-        setReviewId(crypto.randomUUID());
       }
     });
   }
@@ -182,17 +176,17 @@ export default function App({ config, identity }) {
         <div className="brand">
           <Coffee /> CAFÉ JUNÍN
         </div>
-        <p className="brand-sub">
-          {page === "Calidad" ? "Catador Q Grader" : "TRAZABILIDAD DEL CAFÉ"}
-        </p>
+        <p className="brand-sub">TRAZABILIDAD DEL CAFÉ</p>
         <nav aria-label="Módulos">
           {menus.map(([name, Icon]) => (
             <button
               key={name}
-              className={page === name ? "active" : ""}
-              aria-current={page === name ? "page" : undefined}
+              className={activePage === name ? "active" : ""}
+              aria-current={activePage === name ? "page" : undefined}
               onClick={() => {
                 setPage(name);
+                setSelected(null);
+                setResult(null);
                 setDetail(null);
                 setError("");
                 setNotice("");
@@ -214,7 +208,8 @@ export default function App({ config, identity }) {
       <div className="workspace">
         <header>
           <span>
-            Portal web <span className="sep">/</span> {page}
+            Portal web <span className="sep">/</span>{" "}
+            {page === "Cosecha" ? "Lotes / Registrar cosecha" : page}
           </span>
           <div className="account">
             <span>
@@ -241,18 +236,20 @@ export default function App({ config, identity }) {
             <div className="page-title">
               <div>
                 <span className="eyebrow">CAFÉ JUNÍN / OPERACIONES</span>
-                <h1>{page}</h1>
+                <h1>{page === "Cosecha" ? "Registrar cosecha" : page}</h1>
                 <p>
                   {page === "Inicio"
                     ? "El origen, la calidad y el riesgo de tus lotes, en un mismo lugar."
                     : "Registra y consulta la información autorizada para tu cuenta."}
                 </p>
               </div>
-              <span className="pill">
-                {config.predictor === "rules"
-                  ? "Estimación por reglas"
-                  : "Servicio XGBoost"}
-              </span>
+              {page === "Riesgo" && (
+                <span className="pill">
+                  {config.predictor === "rules"
+                    ? "Estimación por reglas"
+                    : "Servicio XGBoost"}
+                </span>
+              )}
             </div>
           )}
           {error && (
@@ -428,9 +425,11 @@ export default function App({ config, identity }) {
               )}
             </section>
           )}
-          {page === "Cosecha" && (
+          {page === "Cosecha" && can("PRODUCTOR") && (
             <section className="form-panel">
-              <h2>Registrar cosecha</h2>
+              <button className="secondary" onClick={() => setPage("Lotes")}>
+                Volver a lotes
+              </button>
               <p className="muted">
                 El lote conserva su identificador si reintentas el envío.
               </p>
@@ -498,49 +497,68 @@ export default function App({ config, identity }) {
               cancelar={() => setPage("Lotes")}
             />
           )}
-          {page === "Riesgo IA" && (
+          {page === "Riesgo" && can("SUPERVISOR") && (
             <section className="form-panel">
               <h2>Evaluar riesgo del lote</h2>
               <div className="banner">
-                La humedad corresponde al ambiente, no a la humedad del grano.
-                El modelo incluido usa datos sintéticos y requiere validación
-                con datos reales.
+                Registra la humedad relativa medida en el ambiente y la demora
+                logística observada para este lote. El sistema usará esos
+                valores para estimar el riesgo.
               </div>
-              <form onSubmit={(e) => submit(e, "riesgo")}>
-                {lotSelect}
-                <div className="form-grid">
-                  <Field label="Humedad relativa ambiental (%)">
-                    <input
-                      type="number"
-                      name="humedad"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      required
-                    />
-                  </Field>
-                  <Field label="Demora (horas)">
-                    <input
-                      type="number"
-                      name="horasDemora"
-                      min="0"
-                      step="0.1"
-                      required
-                    />
-                  </Field>
-                </div>
-                <button disabled={busy || !lots.length}>Evaluar riesgo</button>
+              <form
+                onChange={() => setResult(null)}
+                onSubmit={(e) => submit(e, "riesgo")}
+              >
+                <fieldset disabled={busy} className="mediciones-riesgo">
+                  {lotSelect}
+                  <div className="form-grid">
+                    <Field label="Humedad relativa ambiental (%)">
+                      <input
+                        type="number"
+                        name="humedad"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        required
+                      />
+                    </Field>
+                    <Field label="Demora (horas)">
+                      <input
+                        type="number"
+                        name="horasDemora"
+                        min="0"
+                        step="0.1"
+                        required
+                      />
+                    </Field>
+                  </div>
+                </fieldset>
+                <button disabled={busy || !lots.length}>
+                  {busy ? "Evaluando…" : "Evaluar riesgo"}
+                </button>
               </form>
               {result && (
                 <div className="result">
-                  <strong>
-                    {(result.probabilidad.valor * 100).toFixed(1)}%
-                  </strong>
-                  <p>
-                    {result.probabilidad.valor > 0.7
-                      ? "Riesgo mayor al 70%: consulta Alertas."
-                      : "Resultado registrado. Solo un valor mayor al 70% genera alerta."}
-                  </p>
+                  <strong>{porcentaje(result.probabilidad.valor)}</strong>
+                  {alertaGenerada && (
+                    <p>
+                      <button
+                        className="secondary"
+                        onClick={() => {
+                          setSelected(alertaGenerada.id);
+                          setPage("Alertas");
+                          setNotice("");
+                        }}
+                      >
+                        {alertaGenerada.estado === "PENDIENTE"
+                          ? "Revisar alerta generada"
+                          : "Consultar alerta generada"}
+                      </button>
+                    </p>
+                  )}
+                  {!alertaGenerada && !busy && !error && (
+                    <p>Evaluación registrada sin alerta.</p>
+                  )}
                   <small>
                     {result.modelo} ·{" "}
                     {result.simulada
@@ -551,85 +569,13 @@ export default function App({ config, identity }) {
               )}
             </section>
           )}
-          {page === "Alertas" && (
-            <section>
-              <h2>Revisión del supervisor</h2>
-              {!alerts.length && (
-                <p className="empty">No hay alertas registradas.</p>
-              )}
-              {alerts.map((a) => (
-                <article className="alert-row" key={a.id}>
-                  <div>
-                    <span
-                      className={`pill ${a.estado === "PENDIENTE" ? "amber" : ""}`}
-                    >
-                      {a.estado}
-                    </span>
-                    <h3>Lote {short(a.loteId)}</h3>
-                    <small>Alerta {short(a.id)}</small>
-                    {a.motivo && (
-                      <p>
-                        {a.motivo}
-                        {a.instruccion && ` · Instrucción: ${a.instruccion}`}
-                      </p>
-                    )}
-                  </div>
-                  {a.estado === "PENDIENTE" && (
-                    <button
-                      className="secondary"
-                      onClick={() => {
-                        setSelected(a.id);
-                        setDecision("CONFIRMADA");
-                        setReviewId(crypto.randomUUID());
-                      }}
-                    >
-                      Revisar alerta
-                    </button>
-                  )}
-                </article>
-              ))}
-              {selected && (
-                <form
-                  key={selected}
-                  className="detail"
-                  onSubmit={(e) => submit(e, "revision")}
-                >
-                  <h3>Revisar alerta {short(selected)}</h3>
-                  <Field label="Decisión">
-                    <select
-                      value={decision}
-                      onChange={(e) => setDecision(e.target.value)}
-                    >
-                      <option>CONFIRMADA</option>
-                      <option>DESCARTADA</option>
-                    </select>
-                  </Field>
-                  <Field label="Motivo de la decisión">
-                    <textarea
-                      name="motivo"
-                      minLength="5"
-                      maxLength="1000"
-                      required
-                    />
-                  </Field>
-                  {decision === "CONFIRMADA" && (
-                    <Field label="Instrucción para atender el riesgo">
-                      <textarea
-                        name="instruccion"
-                        minLength="5"
-                        maxLength="1000"
-                        required
-                      />
-                    </Field>
-                  )}
-                  <p className="muted">
-                    La decisión queda registrada con tu cuenta y no se puede
-                    reemplazar desde esta pantalla.
-                  </p>
-                  <button disabled={busy}>Registrar decisión</button>
-                </form>
-              )}
-            </section>
+          {page === "Alertas" && can("SUPERVISOR") && (
+            <Alertas
+              alertas={alerts}
+              seleccion={selected}
+              seleccionar={setSelected}
+              alRevisar={actualizarAlerta}
+            />
           )}
         </main>
         <footer>

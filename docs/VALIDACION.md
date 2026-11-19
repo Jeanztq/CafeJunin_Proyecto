@@ -3,9 +3,9 @@
 ## Registro de calidad y persistencia local
 
 - Java y Spring Boot. La suite verifica restricciones sensoriales, cómputo en el servidor, rechazo del puntaje manual, autorización por rol, umbral configurable, reintentos y reversión si falla el consumidor. Incluye reapertura de H2 en archivo. Se ejecutaron 21 pruebas con éxito. La prueba JDBC optativa para SQL Server requiere las credenciales del despliegue.
-- React. Se ejecutaron seis pruebas, incluidas previsualización del puntaje, corrección de valores, reintento con el mismo identificador y cancelación.
+- React. Pasaron nueve pruebas. Cubren la navegación por rol, el registro de cosecha desde Lotes, la previsualización del puntaje, los reintentos y la cancelación. Para las alertas se comprueba la recuperación de la evidencia tras un fallo de conexión y la consulta de la decisión cuando otro supervisor cierra la revisión.
 - SQL Express. Los procedimientos y la actualización del esquema se probaron en una base temporal. Se verificaron las columnas de la cata clásica, el registro del evento y el rollback conjunto.
-- Edge y JAR local. Desde una base nueva se registraron cosecha y cata, se corrigió una nota inválida y se obtuvo 85 sobre 100. Tras registrar riesgo y revisar su alerta se terminó el proceso y se inició otro con la misma base. El detalle recuperó las diez notas, el puntaje y los cinco movimientos. La ficha también se comprobó a 390 px de ancho.
+- Edge y JAR local. Desde una base nueva se registraron cosecha y cata, se corrigió una nota inválida y se obtuvo 85 sobre 100. Un supervisor registró 95 % de humedad y 36 horas de demora. Después de otra evaluación del mismo lote, la alerta siguió mostrando las mediciones originales. Se confirmó desde el navegador y se reinició el JAR con la misma base. El portal recuperó la decisión, su instrucción, la ficha de diez notas y los seis movimientos. Tanto la ficha de cata como la revisión se comprobaron a 390 px de ancho.
 - Integración HTTP. Se ejecutó el recorrido del JAR con FastAPI y el modelo XGBoost incluido. Se verificaron el reintento de cosecha, la revisión de alertas y la respuesta ante la caída del predictor.
 
 ## Evidencia histórica anterior al incremento HU08

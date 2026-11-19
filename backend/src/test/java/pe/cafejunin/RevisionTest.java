@@ -16,7 +16,7 @@ class RevisionTest {
   final Clock clock = Clock.fixed(Instant.parse("2026-10-20T12:00:00Z"), ZoneOffset.UTC);
 
   Alerta alerta() {
-    var a = new Alerta(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "PENDIENTE");
+    var a = new Alerta(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "PENDIENTE", clock.instant());
     db.guardar(a);
     return a;
   }

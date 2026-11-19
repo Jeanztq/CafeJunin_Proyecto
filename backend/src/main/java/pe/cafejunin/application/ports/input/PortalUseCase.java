@@ -21,6 +21,11 @@ public interface PortalUseCase {
 
   List<Alerta> alertas();
 
+  record DetalleAlerta(Alerta alerta, Lote lote, Parcela parcela, EvaluacionRiesgo evaluacion,
+      double umbralAlerta) {}
+
+  DetalleAlerta detalleAlerta(UUID id);
+
   Lote cosecha(Lote lote);
 
   EvaluacionCalidad calidad(RegistrarCalidadUseCase.Solicitud solicitud);

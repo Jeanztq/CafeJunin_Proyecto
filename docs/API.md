@@ -13,6 +13,7 @@ Base `/api`. JSON. Seguridad activa: Bearer JWT salvo config/info. Las operacion
 | POST /lotes/{id}/evaluaciones | Catador · registro de ficha física y sensorial |
 | POST /lotes/{id}/riesgos | Supervisor: llamar predictor y guardar riesgo |
 | GET /alertas | Supervisor: alertas |
+| GET /alertas/{id} | Supervisor · alerta, lote, parcela, evaluación que la originó y umbral de alerta |
 | PUT /alertas/{id}/decision | Supervisor: confirmar/descartar |
 
 Cosecha: `id` UUID estable, `parcelaId` UUID, `fechaCosecha` YYYY-MM-DD, `variedad` TYPICA/GEISHA/BOURBON/CATIMOR, `tipoRecoleccion` SELECTIVA/GENERAL, `pesoKg` >0 con hasta tres decimales y ocho enteros. La fecha no puede ser futura. Un reintento idéntico devuelve 201 sin duplicar lote/evento; el mismo UUID con otro contenido devuelve 409.

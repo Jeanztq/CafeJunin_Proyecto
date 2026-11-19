@@ -1,15 +1,17 @@
 {
   "version": "0.2.0",
-  "verifiedAt": "2026-10-23T00:26:53.600734+00:00",
-  "jarSha256": "f9f76a13eb2102ec321764587dbc2d81a9abb12e92413814aef1dbf1538bed16",
+  "verifiedAt": "2026-11-19T14:48:40.647109+00:00",
+  "jarSha256": "949254e4fdd86a2986ae8b629c74fff6b5ef0beac2dbc15029f07b1919a41be9",
   "java": {
-    "passed": 19,
+    "passed": 21,
     "skippedSqlServer": 1
   },
-  "reactPassed": 4,
+  "reactPassed": 9,
   "pythonPassed": 1,
   "httpIntegration": "PASS",
-  "sqlServerLive": "NOT_RUN",
+  "sqlServerLive": "TSQL_PASS",
   "keycloakLive": "NOT_RUN",
-  "flutterBuild": "NOT_RUN"
+  "flutterBuild": "NOT_RUN",
+  "localRestart": "PASS",
+  "browser": "EDGE_PASS"
 }

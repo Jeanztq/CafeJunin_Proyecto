@@ -662,3 +662,38 @@ footer {
   color: #28513d;
   font-weight: 700;
 }
+
+.revision-alerta > h2,
+.revision-alerta > h3 {
+  margin: 1.4rem 0 0.65rem;
+}
+.datos-alerta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 1rem;
+  margin: 0 0 1.5rem;
+}
+.datos-alerta > div {
+  border-left: 3px solid #ded4c5;
+  padding-left: 0.75rem;
+  min-width: 0;
+}
+.datos-alerta dt {
+  font-size: 0.85rem;
+  color: #655a4f;
+}
+.datos-alerta dd {
+  margin: 0.25rem 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.mediciones-riesgo {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 1rem;
+}

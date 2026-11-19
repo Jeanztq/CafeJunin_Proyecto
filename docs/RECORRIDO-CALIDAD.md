@@ -1,6 +1,6 @@
 # Recorrido de cosecha y cata
 
-1. Abre **INICIAR-CAFE-JUNIN.cmd**, entra en http://localhost:8080 y registra una cosecha en El Mirador. Por ejemplo, selecciona Bourbon, 120.500 kg y la fecha de recolección. El sistema asigna el identificador del lote.
+1. Abre **INICIAR-CAFE-JUNIN.cmd**, entra en http://localhost:8080 y elige **Lotes y muestras → Registrar cosecha**. Registra la cosecha en El Mirador. Por ejemplo, selecciona Bourbon, 120.500 kg y la fecha de recolección. El sistema asigna el identificador del lote.
 2. Abre Calidad y elige el lote. Registra 0 defectos físicos primarios y 2 secundarios. Estos conteos describen el grano verde.
 3. Califica fragancia, acidez, posgusto, balance y apreciación global con 8. Asigna 8.5 a sabor y cuerpo. Registra 10 en uniformidad, dulzor y taza limpia. Las diez notas suman 87.
 4. Registra una taza con defecto leve y cero con defecto grave. El total baja a **85**. Si intentas registrar seis tazas afectadas o una nota fuera de escala, puedes corregirla antes de guardar.

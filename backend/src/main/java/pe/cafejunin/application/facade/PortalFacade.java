@@ -1,6 +1,7 @@
 package pe.cafejunin.application.facade;
 
 import java.util.*;
+import pe.cafejunin.domain.valueobjects.Probabilidad;
 import pe.cafejunin.application.ports.input.*;
 import pe.cafejunin.application.ports.output.*;
 import pe.cafejunin.application.usecases.*;
@@ -81,6 +82,19 @@ public final class PortalFacade implements PortalUseCase {
   public List<Alerta> alertas() {
     exige("SUPERVISOR");
     return riesgos.listarAlertas();
+  }
+
+  public DetalleAlerta detalleAlerta(UUID id) {
+    exige("SUPERVISOR");
+    var alerta = riesgos.buscarAlerta(id)
+        .orElseThrow(() -> new NoEncontradoException("Alerta no encontrada"));
+    var evaluacion = riesgos.buscarRiesgo(alerta.evaluacionRiesgoId())
+        .filter(e -> e.loteId().equals(alerta.loteId()))
+        .orElseThrow(() -> new NoEncontradoException("No se encontró la evaluación que originó la alerta"));
+    var lote = autorizado(alerta.loteId());
+    var parcela = lotes.buscarParcela(lote.parcelaId())
+        .orElseThrow(() -> new NoEncontradoException("Parcela no encontrada"));
+    return new DetalleAlerta(alerta, lote, parcela, evaluacion, Probabilidad.UMBRAL_ALERTA);
   }
 
   public Detalle detalle(UUID id) {

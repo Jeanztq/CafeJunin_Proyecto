@@ -16,6 +16,7 @@ Convención: GIVEN–WHEN–THEN (Dado–Cuando–Entonces).
 | Umbral IA | Predictor devuelve exactamente 0.70 | Evalúa | No genera alerta |
 | Umbral IA | Predictor devuelve 0.7001 | Evalúa | Genera alerta PENDIENTE y evento |
 | Caída IA | Servicio no disponible | Evalúa | 503 y ninguna evaluación nueva |
+| Evidencia de alerta | Dos evaluaciones del mismo lote | Abre la alerta de la primera | Recupera las mediciones y el modelo de la evaluación que la originó |
 | Confirmación | Supervisor y alerta pendiente | Confirma con motivo e instrucción | CONFIRMADA, responsable, instante y evento |
 | Descarte | Supervisor y alerta pendiente | Descarta con motivo | DESCARTADA sin instrucción correctiva |
 | Reintento revisión | Operación/contenido/responsable idénticos | Reenvía decisión | Mismo resultado y un solo evento |

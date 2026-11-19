@@ -4,7 +4,7 @@
 
 1. Comprueba que Java sea versión 17 o posterior con **java -version**.
 2. Ejecuta **INICIAR-CAFE-JUNIN.cmd** y abre http://localhost:8080.
-3. En Calidad elige **Registrar cosecha** si todavía no tienes lotes. Selecciona la parcela de origen e ingresa fecha, variedad, recolección y peso. Después abre Calidad y registra la ficha.
+3. En **Lotes y muestras** elige **Registrar cosecha**. Selecciona la parcela de origen e ingresa fecha, variedad, recolección y peso. Después abre Calidad y registra la ficha.
 4. Abre **Lotes y muestras → Ver detalle** para ver los movimientos, el puntaje y el perfil sensorial. Puedes cerrar y volver a iniciar el portal.
 
 El perfil local usa una cuenta de operador en este equipo y escucha en la interfaz de bucle local. H2 guarda el archivo **state/cafejunin.mv.db**. El lanzador fija el directorio de trabajo en la raíz del proyecto. Para otro directorio configura CAFEJUNIN_DATA con la ruta base de la base de datos, sin extensión. La configuración de SQL Server y Keycloak para cuentas individuales figura en [Conexiones](docs/CONEXIONES.md).

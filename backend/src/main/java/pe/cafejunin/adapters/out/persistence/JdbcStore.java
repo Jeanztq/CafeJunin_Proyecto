@@ -2,6 +2,7 @@ package pe.cafejunin.adapters.out.persistence;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Supplier;
@@ -21,7 +22,10 @@ public abstract class JdbcStore
   protected final JdbcTemplate jdbc;
   private final TransactionTemplate tx;
 
-  protected JdbcStore(JdbcTemplate j, TransactionTemplate t) {
+  private final ZoneId zonaRegistro;
+
+  protected JdbcStore(JdbcTemplate j, TransactionTemplate t, ZoneId zonaRegistro) {
+    this.zonaRegistro = zonaRegistro;
     jdbc = j;
     tx = t;
   }
@@ -108,19 +112,20 @@ public abstract class JdbcStore
         this::ficha, id.toString());
   }
 
+  private EvaluacionRiesgo riesgo(ResultSet r, int fila) throws SQLException {
+    return new EvaluacionRiesgo(id(r, "id"), id(r, "lote_id"), r.getDouble("humedad"),
+        r.getDouble("horas_demora"), new Probabilidad(r.getDouble("probabilidad")),
+        r.getString("modelo"), r.getBoolean("simulada"));
+  }
+
+  public Optional<EvaluacionRiesgo> buscarRiesgo(UUID id) {
+    return jdbc.query("SELECT * FROM dbo.evaluaciones_riesgo WHERE id=?", this::riesgo,
+        id.toString()).stream().findFirst();
+  }
+
   public List<EvaluacionRiesgo> riesgosDe(UUID id) {
-    return jdbc.query(
-        "SELECT * FROM dbo.evaluaciones_riesgo WHERE lote_id=? ORDER BY registrado_en,id",
-        (r, n) ->
-            new EvaluacionRiesgo(
-                id(r, "id"),
-                id(r, "lote_id"),
-                r.getDouble("humedad"),
-                r.getDouble("horas_demora"),
-                new Probabilidad(r.getDouble("probabilidad")),
-                r.getString("modelo"),
-                r.getBoolean("simulada")),
-        id.toString());
+    return jdbc.query("SELECT * FROM dbo.evaluaciones_riesgo WHERE lote_id=? ORDER BY registrado_en,id",
+        this::riesgo, id.toString());
   }
 
   private Alerta alerta(ResultSet r, int n) throws SQLException {
@@ -134,7 +139,8 @@ public abstract class JdbcStore
         r.getString("instruccion"),
         r.getString("responsable"),
         t == null ? null : t.toInstant(),
-        id(r, "operacion_id"));
+        id(r, "operacion_id"),
+        r.getObject("registrada_en", LocalDateTime.class).atZone(zonaRegistro).toInstant());
   }
 
   public List<Alerta> listarAlertas() {

@@ -148,6 +148,11 @@ public class TrazabilidadController {
     return portal.alertas();
   }
 
+  @GetMapping("/alertas/{id}")
+  public PortalUseCase.DetalleAlerta detalleAlerta(@PathVariable UUID id) {
+    return portal.detalleAlerta(id);
+  }
+
   @PutMapping("/alertas/{id}/decision")
   public Alerta decision(@PathVariable UUID id, @Valid @RequestBody DecisionRequest r) {
     return portal.revisar(id, r.operacionId(), r.estado(), r.motivo(), r.instruccion());

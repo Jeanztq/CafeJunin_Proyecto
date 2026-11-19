@@ -10,6 +10,8 @@ public interface RiesgoRepositoryPort {
 
   List<Alerta> listarAlertas();
 
+  Optional<EvaluacionRiesgo> buscarRiesgo(UUID id);
+
   Optional<Alerta> buscarAlerta(UUID id);
 
   void actualizarPendiente(Alerta alerta);

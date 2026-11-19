@@ -18,4 +18,4 @@ La historia elegida para la entrega final es **HU08 · Registrar la evaluación 
 | docs | Arquitectura, alcance, conexiones, contrato y evidencia |
 | .github/workflows | CI Java, React y Python, preparado para GitHub |
 
-Los módulos de cosecha, predicción y revisión de alertas siguen disponibles por rol. El modelo XGBoost incluido se entrenó con datos sintéticos. HU08 funciona sin el servicio de IA. Para compilar el proyecto o configurar persistencia y autenticación, consulta [la guía de inicio](LEEME-PRIMERO.md).
+La cuenta local reúne productor, catador y supervisor. Entra en **Lotes y muestras → Registrar cosecha** para crear un lote. En **Riesgo**, el supervisor registra las mediciones y puede abrir la alerta generada. En **Alertas** consulta la evaluación de origen, registra la decisión y recupera su motivo e instrucción. Una cuenta con solo el rol de catador entra directamente en **Calidad**. El modelo XGBoost incluido se entrenó con datos sintéticos. HU08 funciona sin el servicio de IA. Para compilar el proyecto o configurar persistencia y autenticación, consulta [la guía de inicio](LEEME-PRIMERO.md).

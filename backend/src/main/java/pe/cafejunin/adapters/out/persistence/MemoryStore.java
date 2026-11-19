@@ -43,6 +43,10 @@ public final class MemoryStore
     return calidad.values().stream().filter(x -> x.loteId().equals(id)).toList();
   }
 
+  public synchronized Optional<EvaluacionRiesgo> buscarRiesgo(UUID id) {
+    return Optional.ofNullable(riesgos.get(id));
+  }
+
   public synchronized List<EvaluacionRiesgo> riesgosDe(UUID id) {
     return riesgos.values().stream().filter(x -> x.loteId().equals(id)).toList();
   }

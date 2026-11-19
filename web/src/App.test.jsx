@@ -91,3 +91,12 @@ test("presenta errores del servidor", async () => {
     "Servidor no disponible",
   );
 });
+
+test("el transportista abre sus envíos sin consultar el catálogo de cosechas", async () => {
+  mock("TRANSPORTISTA");
+  render(<App config={{ seguridadActiva: false }} />);
+  await screen.findByRole("heading", { name: "Envíos asignados" });
+  expect(screen.getByRole("navigation").textContent).toBe("InicioMis envíos");
+  expect(screen.queryByText("Asignar un lote")).toBeNull();
+  expect(api.mock.calls.map(([ruta]) => ruta)).not.toContain("/lotes");
+});

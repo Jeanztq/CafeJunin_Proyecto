@@ -13,13 +13,35 @@ public final class MemoryStore
         RiesgoRepositoryPort,
         EventoRepositoryPort,
         HistorialLotePort,
+        EnviosPort,
         UnidadTrabajoPort {
   public static final UUID PARCELA_MIRADOR = UUID.fromString("11111111-1111-1111-1111-111111111111");
   private Map<UUID, Lote> lotes = new LinkedHashMap<>();
   private Map<UUID, EvaluacionCalidad> calidad = new LinkedHashMap<>();
   private Map<UUID, EvaluacionRiesgo> riesgos = new LinkedHashMap<>();
   private Map<UUID, Alerta> alertas = new LinkedHashMap<>();
+  private Map<UUID, Envio> envios = new LinkedHashMap<>();
+  private List<Envio.Novedad> novedades = new ArrayList<>();
   private List<EventoDominio> eventos = new ArrayList<>();
+
+  public List<Envio.Transportista> transportistas() {
+    return List.of(new Envio.Transportista("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4", "Transportista de Satipo"));
+  }
+
+  public synchronized List<Envio> envios(Optional<String> subject) {
+    return envios.values().stream().filter(e -> subject.isEmpty() || subject.get().equals(e.transportista()))
+        .sorted(Comparator.comparing(Envio::asignadoEn).reversed()).toList();
+  }
+
+  public synchronized Optional<Envio> envioParaRegistro(UUID loteId) { return Optional.ofNullable(envios.get(loteId)); }
+  public synchronized void asignar(Envio envio) { envios.put(envio.loteId(), envio); }
+  public synchronized void despachar(Envio envio) { envios.put(envio.loteId(), envio); }
+
+  public synchronized List<Envio.Novedad> novedades(UUID loteId) {
+    return novedades.stream().filter(n -> n.loteId().equals(loteId)).toList();
+  }
+
+  public synchronized void agregar(Envio.Novedad novedad) { novedades.add(novedad); }
 
   public synchronized boolean existeParcela(UUID id) {
     return buscarParcela(id).isPresent();
@@ -116,6 +138,8 @@ public final class MemoryStore
     var r = new LinkedHashMap<>(riesgos);
     var a = new LinkedHashMap<>(alertas);
     var ev = new ArrayList<>(eventos);
+    var viajes = new LinkedHashMap<>(envios);
+    var registros = new ArrayList<>(novedades);
     try {
       return accion.get();
     } catch (RuntimeException | Error ex) {
@@ -124,6 +148,8 @@ public final class MemoryStore
       riesgos = r;
       alertas = a;
       eventos = ev;
+      envios = viajes;
+      novedades = registros;
       throw ex;
     }
   }

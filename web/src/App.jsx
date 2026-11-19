@@ -5,11 +5,13 @@ import {
   Package,
   ClipboardCheck,
   BrainCircuit,
+  Truck,
   Bell,
   LogOut,
   ArrowRight,
 } from "lucide-react";
 import { api } from "./api";
+import Transporte from "./Transporte";
 import Alertas, { porcentaje } from "./Alertas";
 import Calidad, { ResultadoCalidad } from "./Calidad";
 const hitos = {
@@ -17,6 +19,10 @@ const hitos = {
   EvaluacionCalidadRegistrada: "Evaluación de calidad registrada",
   RiesgoEvaluado: "Riesgo evaluado",
   RiesgoAltoDetectado: "Riesgo alto detectado",
+  EnvioAsignado: "Envío asignado",
+  DespachoRegistrado: "Salida registrada",
+  ControlRutaRegistrado: "Control de ruta registrado",
+  IncidenciaReportada: "Incidencia reportada",
   AlertaRevisada: "Alerta revisada",
 };
 const labels = {
@@ -58,9 +64,11 @@ export default function App({ config, identity }) {
   const alertaGenerada =
     result && alerts.find((a) => a.evaluacionRiesgoId === result.id);
   const can = (role) => account?.roles.includes(role);
+  const consultaLotes = can("PRODUCTOR") || can("CATADOR") || can("SUPERVISOR");
+  const nombreTransporte = can("SUPERVISOR") ? "Transporte" : "Mis envíos";
   const menus = [
     ["Inicio", LayoutDashboard],
-    ["Lotes", Package],
+    ...(consultaLotes ? [["Lotes", Package]] : []),
     ...(can("CATADOR") ? [["Calidad", ClipboardCheck]] : []),
     ...(can("SUPERVISOR")
       ? [
@@ -68,13 +76,19 @@ export default function App({ config, identity }) {
           ["Alertas", Bell],
         ]
       : []),
+    ...(can("SUPERVISOR") || can("TRANSPORTISTA")
+      ? [[nombreTransporte, Truck]]
+      : []),
   ];
   async function refresh(inicial = false) {
     const a = await api("/me");
     setAccount(a);
+    const leeLotes = a.roles.some((r) =>
+      ["SUPERVISOR", "PRODUCTOR", "CATADOR"].includes(r),
+    );
     const [l, p, al] = await Promise.all([
-      api("/lotes"),
-      api("/parcelas"),
+      leeLotes ? api("/lotes") : [],
+      leeLotes ? api("/parcelas") : [],
       a.roles.includes("SUPERVISOR") ? api("/alertas") : [],
     ]);
     setLots(l);
@@ -82,6 +96,8 @@ export default function App({ config, identity }) {
     setAlerts(al);
     if (inicial && a.roles.length === 1 && a.roles.includes("CATADOR"))
       setPage("Calidad");
+    if (inicial && a.roles.length === 1 && a.roles.includes("TRANSPORTISTA"))
+      setPage("Mis envíos");
   }
   useEffect(() => {
     if (config.seguridadActiva && !identity?.authenticated) {
@@ -263,7 +279,7 @@ export default function App({ config, identity }) {
             </div>
           )}
           {loading && <p role="status">Cargando información…</p>}
-          {!loading && page === "Inicio" && (
+          {!loading && page === "Inicio" && consultaLotes && (
             <>
               <div className="stats">
                 <article>
@@ -303,19 +319,35 @@ export default function App({ config, identity }) {
                 </div>
                 <Coffee size={110} strokeWidth={1} />
               </section>
-              {can("TRANSPORTISTA") && (
-                <section>
-                  <h2>Transporte</h2>
-                  <p>
-                    La asignación de viajes, las evidencias y la sincronización
-                    móvil se implementarán en la siguiente fase. Esta cuenta
-                    todavía no tiene operaciones de transporte disponibles.
-                  </p>
-                </section>
-              )}
             </>
           )}
-          {page === "Lotes" && (
+          {!loading &&
+            page === "Inicio" &&
+            !consultaLotes &&
+            can("TRANSPORTISTA") && (
+              <section>
+                <h2>Ruta de transporte</h2>
+                <p>
+                  Consulta tus asignaciones y registra la salida, los puntos de
+                  control y las incidencias de cada viaje.
+                </p>
+                <button onClick={() => setPage(nombreTransporte)}>
+                  Consultar mis envíos
+                </button>
+              </section>
+            )}
+          {page === nombreTransporte &&
+            (can("SUPERVISOR") || can("TRANSPORTISTA")) && (
+              <Transporte cuenta={account} lotes={lots} />
+            )}
+          {!loading &&
+            page === "Inicio" &&
+            account &&
+            !consultaLotes &&
+            !can("TRANSPORTISTA") && (
+              <p>Tu cuenta aún no tiene un rol operativo asignado.</p>
+            )}
+          {page === "Lotes" && consultaLotes && (
             <section>
               <div className="section-title">
                 <h2>Lotes registrados</h2>

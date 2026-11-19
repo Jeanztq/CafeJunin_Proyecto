@@ -23,6 +23,21 @@ public final class LocalJdbcStore extends JdbcStore {
     return super.ejecutar(operacion);
   }
 
+  public void asignar(Envio e) {
+    jdbc.update("INSERT INTO dbo.envios(lote_id,transportista,asignado_por,asignado_en) VALUES (?,?,?,?)",
+        e.loteId(), e.transportista(), e.asignadoPor(), LocalDateTime.ofInstant(e.asignadoEn(), ZoneOffset.UTC));
+  }
+
+  public void despachar(Envio e) {
+    jdbc.update("UPDATE dbo.envios SET salida=?,placa=?,peso_carga=? WHERE lote_id=?",
+        LocalDateTime.ofInstant(e.salida(), ZoneOffset.UTC), e.placa(), e.pesoCargaKg(), e.loteId());
+  }
+
+  public void agregar(Envio.Novedad n) {
+    jdbc.update("INSERT INTO dbo.novedades_envio(lote_id,id,tipo,lugar,descripcion,registrada_en) VALUES (?,?,?,?,?,?)",
+        n.loteId(), n.id(), n.tipo().name(), n.lugar(), n.descripcion(), LocalDateTime.ofInstant(n.registradaEn(), ZoneOffset.UTC));
+  }
+
   public void guardar(Lote l) {
     jdbc.update("""
         INSERT INTO dbo.lotes (id, parcela_id, fecha_cosecha, variedad, tipo_recoleccion, peso_kg)

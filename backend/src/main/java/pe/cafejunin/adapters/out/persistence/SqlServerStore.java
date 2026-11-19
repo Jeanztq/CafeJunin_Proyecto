@@ -92,6 +92,19 @@ public final class SqlServerStore extends JdbcStore {
     }
   }
 
+  public void asignar(Envio e) {
+    call("sp_asignar_envio", e.loteId(), e.transportista(), e.asignadoPor(), LocalDateTime.ofInstant(e.asignadoEn(), ZoneOffset.UTC));
+  }
+
+  public void despachar(Envio e) {
+    call("sp_despachar_envio", e.loteId(), LocalDateTime.ofInstant(e.salida(), ZoneOffset.UTC), e.placa(), e.pesoCargaKg());
+  }
+
+  public void agregar(Envio.Novedad n) {
+    call("sp_registrar_novedad_envio", n.loteId(), n.id(), n.tipo().name(), n.lugar(), n.descripcion(),
+        LocalDateTime.ofInstant(n.registradaEn(), ZoneOffset.UTC));
+  }
+
   public void agregar(EventoDominio e) {
     call(
         "sp_encolar_evento",

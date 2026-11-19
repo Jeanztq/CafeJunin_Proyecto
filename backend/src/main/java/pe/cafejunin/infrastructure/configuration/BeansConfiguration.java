@@ -88,6 +88,12 @@ public class BeansConfiguration {
   }
 
   @Bean
+  TransporteUseCase transporte(CuentaActualPort cuenta, LoteRepositoryPort lotes, EnviosPort envios,
+      EventoRepositoryPort eventos, UnidadTrabajoPort tx, Clock reloj) {
+    return new TransporteService(cuenta, lotes, envios, eventos, tx, reloj);
+  }
+
+  @Bean
   PortalUseCase portal(
       HistorialLotePort historial,
       CuentaActualPort a,

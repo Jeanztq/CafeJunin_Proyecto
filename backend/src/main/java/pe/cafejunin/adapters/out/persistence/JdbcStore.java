@@ -18,6 +18,7 @@ public abstract class JdbcStore
         RiesgoRepositoryPort,
         EventoRepositoryPort,
         HistorialLotePort,
+        EnviosPort,
         UnidadTrabajoPort {
   protected final JdbcTemplate jdbc;
   private final TransactionTemplate tx;
@@ -28,6 +29,38 @@ public abstract class JdbcStore
     this.zonaRegistro = zonaRegistro;
     jdbc = j;
     tx = t;
+  }
+
+  public List<Envio.Transportista> transportistas() {
+    return jdbc.query("SELECT subject_id,nombre FROM dbo.transportistas ORDER BY nombre,subject_id",
+        (r, n) -> new Envio.Transportista(r.getString("subject_id"), r.getString("nombre")));
+  }
+
+  private Envio envio(ResultSet r, int fila) throws SQLException {
+    var salida = r.getObject("salida", LocalDateTime.class);
+    return new Envio(id(r, "lote_id"), r.getString("transportista"), r.getString("asignado_por"),
+        r.getObject("asignado_en", LocalDateTime.class).toInstant(ZoneOffset.UTC),
+        salida == null ? null : salida.toInstant(ZoneOffset.UTC), r.getString("placa"), r.getBigDecimal("peso_carga"));
+  }
+
+  public List<Envio> envios(Optional<String> subject) {
+    String base = "SELECT * FROM dbo.envios ";
+    String orden = " ORDER BY asignado_en DESC,lote_id";
+    return subject.isPresent()
+        ? jdbc.query(base + "WHERE transportista=?" + orden, this::envio, subject.get())
+        : jdbc.query(base + orden, this::envio);
+  }
+
+  public Optional<Envio> envioParaRegistro(UUID id) {
+    return jdbc.query("SELECT * FROM dbo.envios " + bloqueoRegistro() + "WHERE lote_id=?",
+        this::envio, id.toString()).stream().findFirst();
+  }
+
+  public List<Envio.Novedad> novedades(UUID loteId) {
+    return jdbc.query("SELECT * FROM dbo.novedades_envio WHERE lote_id=? ORDER BY orden", (r, n) ->
+        new Envio.Novedad(id(r, "id"), loteId, Envio.Tipo.valueOf(r.getString("tipo")),
+            r.getString("lugar"), r.getString("descripcion"),
+            r.getObject("registrada_en", LocalDateTime.class).toInstant(ZoneOffset.UTC)), loteId.toString());
   }
 
   private static UUID id(ResultSet r, String c) throws SQLException {

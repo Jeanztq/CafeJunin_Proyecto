@@ -7,3 +7,8 @@ GO
 UPDATE dbo.parcelas SET nombre=N'El Mirador', propietario_subject='operador-local'
 WHERE id='11111111-1111-1111-1111-111111111111' AND propietario_subject='demo' AND nombre=N'El Mirador · Demo local';
 GO
+
+INSERT INTO dbo.transportistas(subject_id,nombre)
+SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4','Transportista de Satipo'
+WHERE NOT EXISTS (SELECT 1 FROM dbo.transportistas WHERE subject_id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4');
+GO

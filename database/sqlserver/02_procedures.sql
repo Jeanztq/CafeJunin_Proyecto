@@ -48,3 +48,19 @@ AS BEGIN SET NOCOUNT ON; SET XACT_ABORT ON;
 INSERT dbo.outbox_eventos(id,tipo,agregado_id,ocurrido_en,version,evaluacion_id) VALUES(@id,@tipo,@agregado,@fecha,@version,@evaluacion);
 END;
 GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_asignar_envio
+ @lote uniqueidentifier, @transportista nvarchar(255), @supervisor nvarchar(255), @fecha datetime2
+AS
+ INSERT dbo.envios(lote_id,transportista,asignado_por,asignado_en) VALUES (@lote,@transportista,@supervisor,@fecha);
+GO
+CREATE OR ALTER PROCEDURE dbo.sp_despachar_envio
+ @lote uniqueidentifier, @fecha datetime2, @placa varchar(7), @peso decimal(11,3)
+AS
+ UPDATE dbo.envios SET salida=@fecha,placa=@placa,peso_carga=@peso WHERE lote_id=@lote AND salida IS NULL;
+GO
+CREATE OR ALTER PROCEDURE dbo.sp_registrar_novedad_envio
+ @lote uniqueidentifier, @id uniqueidentifier, @tipo varchar(20), @lugar nvarchar(160), @descripcion nvarchar(1000), @fecha datetime2
+AS
+ INSERT dbo.novedades_envio(lote_id,id,tipo,lugar,descripcion,registrada_en) VALUES (@lote,@id,@tipo,@lugar,@descripcion,@fecha);
+GO

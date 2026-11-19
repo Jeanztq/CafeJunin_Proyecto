@@ -69,3 +69,30 @@ IF OBJECT_ID('dbo.ck_fichas_cata_clasica', 'C') IS NULL
     AND tazas_graves+tazas_leves<=5 AND umbral_especialidad IS NOT NULL AND umbral_especialidad BETWEEN 0 AND 100)
  );
 GO
+
+IF OBJECT_ID('dbo.transportistas','U') IS NULL
+ CREATE TABLE dbo.transportistas (
+  subject_id nvarchar(255) COLLATE Latin1_General_100_BIN2 PRIMARY KEY, nombre nvarchar(160) NOT NULL
+);
+GO
+
+IF OBJECT_ID('dbo.envios','U') IS NULL
+ CREATE TABLE dbo.envios (
+  lote_id uniqueidentifier PRIMARY KEY REFERENCES dbo.lotes(id),
+  transportista nvarchar(255) COLLATE Latin1_General_100_BIN2 NOT NULL REFERENCES dbo.transportistas(subject_id),
+  asignado_por nvarchar(255) NOT NULL, asignado_en datetime2 NOT NULL,
+  salida datetime2, placa VARCHAR(7), peso_carga DECIMAL(11,3),
+  CHECK ((salida IS NULL AND placa IS NULL AND peso_carga IS NULL) OR
+         (salida IS NOT NULL AND placa IS NOT NULL AND peso_carga IS NOT NULL AND peso_carga > 0))
+);
+GO
+
+IF OBJECT_ID('dbo.novedades_envio','U') IS NULL
+ CREATE TABLE dbo.novedades_envio (
+  lote_id uniqueidentifier NOT NULL REFERENCES dbo.envios(lote_id), id uniqueidentifier NOT NULL,
+  orden BIGINT IDENTITY(1,1) NOT NULL,
+  tipo VARCHAR(20) NOT NULL CHECK(tipo IN ('CONTROL','DESVIO','DERRUMBE','FALLA_MECANICA')),
+  lugar nvarchar(160) NOT NULL, descripcion nvarchar(1000) NOT NULL, registrada_en datetime2 NOT NULL,
+  PRIMARY KEY(lote_id,id)
+);
+GO

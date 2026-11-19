@@ -40,3 +40,18 @@ Riesgo: `humedad` 0..100 (relativa ambiental, no del grano), `horasDemora` >=0. 
 Decisión: `operacionId` UUID estable, `estado` CONFIRMADA/DESCARTADA, `motivo` 5..1000 caracteres, `instruccion` 5..1000 al confirmar; null/vacía al descartar. Estado final inmutable. Exacto reintento con misma operación/contenido/responsable devuelve la misma decisión; cualquier otro intento final devuelve 409. Se registra el subject del supervisor y la hora del servidor.
 
 Errores: 400 datos inválidos, 401 token ausente/inválido, 403 acceso no autorizado, 404 inexistente, 409 conflicto, 503 predictor/persistencia no disponible. Errores de aplicación: `{estado,mensaje}`. Los 401/403 del filtro pueden tener cuerpo vacío.
+
+## Despacho e incidencias
+
+Las rutas siguientes parten de `/api/transporte`. La aplicación usa un envío por lote en este incremento. El atributo `salida` pasa de nulo a la hora UTC del servidor al confirmar el despacho.
+
+| Método y ruta | Cuenta y operación |
+|---|---|
+| GET /transportistas | El supervisor consulta el directorio de conductores habilitados. |
+| GET /envios | El supervisor consulta las asignaciones de la cooperativa. El conductor recibe solo sus envíos. |
+| GET /envios/{lote} | El supervisor y el conductor asignado consultan lote, despacho y novedades en orden de registro. |
+| PUT /envios/{lote} | El supervisor asigna el lote usando el campo `transportista` con el subject del conductor. |
+| PUT /envios/{lote}/despacho | El conductor confirma la salida con `placa` y `pesoCargaKg`, positivo y hasta el peso registrado del lote. |
+| PUT /envios/{lote}/novedades/{id} | El conductor registra `tipo`, `lugar` y `descripcion` durante el tránsito. El identificador UUID se conserva al reintentar. |
+
+Los tipos previstos son CONTROL, DESVIO, DERRUMBE y FALLA_MECANICA. Las incidencias exigen una descripción. El reintento con los mismos valores recupera el registro existente. Cambiar los datos de una asignación, salida o novedad ya confirmada devuelve 409. Cada operación nueva guarda el movimiento y el evento del lote en la misma transacción.

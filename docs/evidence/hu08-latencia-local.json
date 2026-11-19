@@ -1,0 +1,108 @@
+{
+  "fechaUTC": "2026-11-19T22:01:25.205086+00:00",
+  "jarSha256": "692ab5d834c2330a4e81b0eb97b48cb62bbedb5b3b283518e56ae9fb8066e10b",
+  "java": "java version \"24.0.2\" 2025-07-15",
+  "escenario": "HTTP local, JAR 0.2.0, H2 en archivo temporal, operador local, solicitudes secuenciales",
+  "ruta": "POST /api/lotes/{id}/evaluaciones",
+  "calentamiento": 3,
+  "cronometro": "perf_counter_ns hasta leer y decodificar la respuesta JSON",
+  "excluye": "arranque, creación del lote y consulta posterior de detalle",
+  "resumenMs": {
+    "media": 42.258,
+    "mediana": 39.338,
+    "min": 34.754,
+    "max": 53.174
+  },
+  "medidas": [
+    {
+      "registro": 1,
+      "lote": "6f7b48b3-9592-4b2e-9fca-db95d8c8c675",
+      "ficha": "5f82cb12-c8c0-456b-b18c-b27e99853faf",
+      "ms": 40.55,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    },
+    {
+      "registro": 2,
+      "lote": "feb6232d-438e-4c6f-9cdc-d2a8baa694d0",
+      "ficha": "439ce57f-9ad0-4a84-a560-7c1e5a3efc0f",
+      "ms": 48.792,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    },
+    {
+      "registro": 3,
+      "lote": "a4d8e277-f305-45dd-9247-d9e192a419d9",
+      "ficha": "8babc818-80af-4f71-94c3-5b934eba54c4",
+      "ms": 36.838,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    },
+    {
+      "registro": 4,
+      "lote": "9158060f-9d31-4bff-92f3-b37c3bdedee3",
+      "ficha": "9766c176-4e0e-49aa-b3f6-6e7a868c2161",
+      "ms": 38.126,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    },
+    {
+      "registro": 5,
+      "lote": "dc0845f6-5b14-43f2-aefe-c97032f8cfcb",
+      "ficha": "f5519b5d-c362-4f0a-a6a7-477571d2af84",
+      "ms": 53.174,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    },
+    {
+      "registro": 6,
+      "lote": "1ff6d9c5-249b-481e-a426-8294b3ec00b7",
+      "ficha": "c5ff8db9-13c5-489e-a42c-a9b8946b2dca",
+      "ms": 46.628,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    },
+    {
+      "registro": 7,
+      "lote": "bebb83ff-9dcd-4af6-a5e0-7f4d6c95341f",
+      "ficha": "c1177578-a00f-4b2a-9407-77eac7cd3664",
+      "ms": 34.754,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    },
+    {
+      "registro": 8,
+      "lote": "af9d8c77-3b44-4cb5-9788-8f3e6bde00f2",
+      "ficha": "aa18ed00-2e08-4076-a1dd-005730fdc295",
+      "ms": 36.226,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    },
+    {
+      "registro": 9,
+      "lote": "5e10d98c-2e96-4f88-9848-cf978ce0fb20",
+      "ficha": "c4b4f163-1281-4e9e-9c08-6cfa1ac1170c",
+      "ms": 35.758,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    },
+    {
+      "registro": 10,
+      "lote": "4c975d35-111e-48c9-8b16-6aac2ed88e7c",
+      "ficha": "2c1bd7b1-6d64-4be4-a283-93e41f57e355",
+      "ms": 51.734,
+      "status": 201,
+      "sca": 85,
+      "detalleRecuperado": true
+    }
+  ]
+}

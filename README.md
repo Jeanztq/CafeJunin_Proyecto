@@ -19,3 +19,5 @@ La historia elegida para la entrega final es **HU08 · Registrar la evaluación 
 | .github/workflows | CI Java, React y Python, preparado para GitHub |
 
 El acceso habitual utiliza las cuentas individuales de Keycloak. El productor crea el lote en **Lotes → Registrar cosecha**. La opción explícita `-OperadorLocal` reúne los tres permisos para el trabajo en un solo equipo. En **Riesgo**, el supervisor registra las mediciones y puede abrir la alerta generada. En **Alertas** consulta la evaluación de origen, registra la decisión y recupera su motivo e instrucción. Una cuenta con solo el rol de catador entra directamente en **Calidad**. El modelo XGBoost incluido se entrenó con datos sintéticos. HU08 funciona sin el servicio de IA. Para compilar el proyecto o configurar persistencia y autenticación, consulta [la guía de inicio](LEEME-PRIMERO.md).
+
+**Transporte (HU12 y HU13).** El supervisor asigna un lote desde **Transporte**. El transportista entra en **Mis envíos**, registra la salida y añade controles e incidencias durante el viaje. El supervisor consulta el mismo historial. El recorrido paso a paso está en [la guía de inicio](LEEME-PRIMERO.md).

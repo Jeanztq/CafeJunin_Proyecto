@@ -170,7 +170,8 @@ function Ficha({ loteId, cuenta, volver }) {
   const [error, setError] = useState("");
   const [intento, setIntento] = useState(0);
   const [ocupado, setOcupado] = useState(false);
-  const [tipo, setTipo] = useState("CONTROL");
+  const [incidencia, setIncidencia] = useState(false);
+  const [confirmacion, setConfirmacion] = useState("");
   const [operacion, setOperacion] = useState(() => crypto.randomUUID());
   useEffect(() => {
     let vigente = true;
@@ -178,7 +179,12 @@ function Ficha({ loteId, cuenta, volver }) {
     setFicha(null);
     api(ruta)
       .then((f) => {
-        if (vigente) setFicha(f);
+        if (!vigente) return;
+        setFicha(f);
+        const siguiente = crypto.randomUUID();
+        setOperacion((id) =>
+          f.novedades.some((n) => n.id === id) ? siguiente : id,
+        );
       })
       .catch((e) => {
         if (vigente) setError(e.message);
@@ -195,6 +201,7 @@ function Ficha({ loteId, cuenta, volver }) {
     const datos = Object.fromEntries(new FormData(form));
     setOcupado(true);
     setError("");
+    setConfirmacion("");
     try {
       if (!ficha.envio.salida) {
         const envio = await guardar(ruta + "/despacho", {
@@ -202,16 +209,22 @@ function Ficha({ loteId, cuenta, volver }) {
           pesoCargaKg: Number(datos.peso),
         });
         setFicha({ ...ficha, envio });
+        setConfirmacion("Salida registrada. El envío está en tránsito.");
       } else {
         const novedad = await guardar(ruta + "/novedades/" + operacion, {
-          tipo,
+          tipo: incidencia ? datos.tipo : "CONTROL",
           lugar: datos.lugar,
-          descripcion: datos.descripcion,
+          descripcion: incidencia ? datos.descripcion : datos.observaciones,
         });
         setFicha({ ...ficha, novedades: [...ficha.novedades, novedad] });
         setOperacion(crypto.randomUUID());
         form.reset();
-        setTipo("CONTROL");
+        setIncidencia(false);
+        setConfirmacion(
+          (incidencia ? "Incidencia reportada en " : "Paso registrado en ") +
+            novedad.lugar +
+            ".",
+        );
       }
     } catch (e) {
       setError(e.message);
@@ -223,7 +236,7 @@ function Ficha({ loteId, cuenta, volver }) {
     cuenta.roles.includes("TRANSPORTISTA") &&
     cuenta.subject === ficha?.envio.transportista;
   return (
-    <section>
+    <section className="ficha-transporte">
       <button className="secondary" onClick={volver}>
         Volver a envíos
       </button>
@@ -248,7 +261,17 @@ function Ficha({ loteId, cuenta, volver }) {
             {ficha.lote.peso.kilogramos} kg de cosecha ·{" "}
             {ficha.envio.salida ? "En tránsito" : "Por despachar"}
           </p>
-          <h3>Historial del trayecto</h3>
+          <div className="section-title">
+            <h3>Historial del trayecto</h3>
+            {cuenta.roles.includes("SUPERVISOR") && (
+              <button
+                className="secondary"
+                onClick={() => setIntento((n) => n + 1)}
+              >
+                Actualizar seguimiento
+              </button>
+            )}
+          </div>
           <ol className="movimientos">
             <li>Asignación · {fecha(ficha.envio.asignadoEn)}</li>
             {ficha.envio.salida && (
@@ -258,7 +281,13 @@ function Ficha({ loteId, cuenta, volver }) {
               </li>
             )}
             {ficha.novedades.map((n) => (
-              <li key={n.id}>
+              <li
+                key={n.id}
+                className={n.tipo === "CONTROL" ? undefined : "incidencia-ruta"}
+              >
+                {n.tipo !== "CONTROL" && (
+                  <span className="marca-incidencia">Incidencia</span>
+                )}
                 <strong>
                   {tipos[n.tipo]} · {n.lugar}
                 </strong>{" "}
@@ -267,6 +296,11 @@ function Ficha({ loteId, cuenta, volver }) {
               </li>
             ))}
           </ol>
+          {confirmacion && (
+            <p className="success" role="status">
+              {confirmacion}
+            </p>
+          )}
           {conductor && (
             <form
               key={ficha.envio.salida ? "ruta" : "salida"}
@@ -305,19 +339,37 @@ function Ficha({ loteId, cuenta, volver }) {
                 </>
               ) : (
                 <>
-                  <label>
-                    Tipo de registro
-                    <select
-                      value={tipo}
-                      onChange={(e) => setTipo(e.target.value)}
-                    >
-                      {Object.entries(tipos).map(([k, v]) => (
-                        <option key={k} value={k}>
-                          {v}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <fieldset className="accion-trayecto" disabled={ocupado}>
+                    <legend>¿Qué ocurrió en el trayecto?</legend>
+                    <div>
+                      <label>
+                        <input
+                          type="radio"
+                          name="accion"
+                          value="control"
+                          checked={!incidencia}
+                          onChange={() => setIncidencia(false)}
+                        />
+                        <span>
+                          <strong>Control de ruta</strong>
+                          <small>Pasé por un punto del recorrido.</small>
+                        </span>
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          name="accion"
+                          value="incidencia"
+                          checked={incidencia}
+                          onChange={() => setIncidencia(true)}
+                        />
+                        <span>
+                          <strong>Incidencia</strong>
+                          <small>Ocurrió un problema durante el viaje.</small>
+                        </span>
+                      </label>
+                    </div>
+                  </fieldset>
                   <label>
                     Punto de ruta
                     <input
@@ -327,23 +379,50 @@ function Ficha({ loteId, cuenta, volver }) {
                       placeholder="Localidad o punto de control"
                     />
                   </label>
-                  <label>
-                    {tipo === "CONTROL"
-                      ? "Observaciones (opcional)"
-                      : "Descripción de la incidencia"}
-                    <textarea
-                      name="descripcion"
-                      maxLength="1000"
-                      required={tipo !== "CONTROL"}
-                    />
-                  </label>
+                  <fieldset
+                    className="campos-trayecto"
+                    hidden={incidencia}
+                    disabled={incidencia || ocupado}
+                  >
+                    <label>
+                      Observaciones (opcional)
+                      <textarea name="observaciones" maxLength="1000" />
+                    </label>
+                  </fieldset>
+                  <fieldset
+                    className="campos-trayecto"
+                    hidden={!incidencia}
+                    disabled={!incidencia || ocupado}
+                  >
+                    <label>
+                      Tipo de incidencia
+                      <select name="tipo" required defaultValue="">
+                        <option value="" disabled>
+                          Selecciona el problema
+                        </option>
+                        {Object.entries(tipos)
+                          .filter(([k]) => k !== "CONTROL")
+                          .map(([k, v]) => (
+                            <option key={k} value={k}>
+                              {v}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                    <label>
+                      Descripción de la incidencia
+                      <textarea name="descripcion" maxLength="1000" required />
+                    </label>
+                  </fieldset>
                 </>
               )}
               <button disabled={ocupado}>
                 {ocupado
                   ? "Guardando…"
                   : ficha.envio.salida
-                    ? "Guardar registro"
+                    ? incidencia
+                      ? "Reportar incidencia"
+                      : "Registrar paso"
                     : "Confirmar salida"}
               </button>
             </form>

@@ -9,3 +9,9 @@ Una alerta referencia una evaluación de riesgo y permite una decisión final co
 Los scripts 00..03 no eliminan tablas existentes. CREATE OR ALTER actualiza procedimientos; para cambios futuros de columnas se deberán crear migraciones incrementales. Transporte, sesiones móviles, auditoría general y cooperativas múltiples aún no están modeladas. No asumir que este esquema es la base de datos definitiva del informe.
 
 En los perfiles H2 y SQL Server, HU08 guarda la cabecera en evaluaciones_calidad y el perfil sensorial en fichas_cata. Ambas comparten el UUID de la evaluación. Las fichas clásicas tienen diez atributos, conteos de defectos de taza, método y umbral congelado al registrar. Los registros históricos de ocho atributos conservan sus valores originales. Una evaluación histórica sin perfil sensorial conserva el puntaje original. La identidad del catador y su nombre al registrar permiten reconstruir quién evaluó cada muestra.
+
+## Despacho y seguimiento
+
+La tabla `transportistas` vincula el nombre operativo al identificador de la cuenta. `envios` enlaza el lote, el conductor y el supervisor que lo asignó. Al confirmar la salida se guardan juntos la hora, la placa y el peso de carga. Este incremento admite un envío por lote.
+
+Cada fila de `novedades_envio` conserva el tipo de movimiento, el lugar, la descripción, la fecha y un UUID de operación. El orden de inserción permite reconstruir el trayecto incluso si dos movimientos tienen la misma marca de tiempo. La escritura del dato y la del evento en `outbox_eventos` se confirman juntas.

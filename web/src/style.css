@@ -697,3 +697,62 @@ footer {
   display: grid;
   gap: 1rem;
 }
+
+.accion-trayecto,
+.campos-trayecto {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.accion-trayecto legend {
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+.accion-trayecto > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 195px), 1fr));
+  gap: 0.65rem;
+}
+.accion-trayecto label {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  padding: 0.8rem;
+  border: 1px solid #d9cebe;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.accion-trayecto label:has(:checked) {
+  background: #edf3eb;
+  border-color: #32624a;
+}
+.accion-trayecto input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0.15rem 0 0;
+  accent-color: #32624a;
+}
+.accion-trayecto small {
+  display: block;
+  font-weight: 400;
+  margin-top: 0.25rem;
+}
+.campos-trayecto:not([hidden]) {
+  display: grid;
+  gap: 1rem;
+}
+.marca-incidencia {
+  display: inline-block;
+  margin-right: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  background: #f8e7ce;
+  color: #714012;
+  font-size: 0.8rem;
+}
+.ficha-transporte .movimientos {
+  overflow-wrap: anywhere;
+}
+.ficha-transporte .section-title {
+  flex-wrap: wrap;
+}

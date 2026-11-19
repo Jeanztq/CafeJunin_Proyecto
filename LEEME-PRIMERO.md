@@ -7,11 +7,11 @@
 3. En **Lotes → Registrar cosecha**, elige **La Esperanza** e ingresa fecha, variedad, recolección y peso.
 4. Cierra sesión e ingresa como **catador**. En el primer acceso configura tu autenticador. Abre **Calidad**, evalúa el lote y recupera la ficha desde **Lotes y muestras → Ver detalle**.
 
-El usuario **supervisor** accede a Riesgo y Alertas. El **transportista** todavía carece de viajes asignados. El doble factor protege a catadores y supervisores. Las cuatro cuentas importadas pertenecen al entorno local de desarrollo. En un despliegue se configuran el proveedor de identidad, las cuentas y las direcciones HTTPS propias del entorno.
+Con **supervisor**, abre **Transporte** y asigna un lote a **Transportista de Satipo**. Entra como **transportista**, abre el lote en **Mis envíos** y confirma la salida con la placa y el peso de carga. Para dejar constancia del paso por una localidad, elige **Control de ruta** y pulsa **Registrar paso**. Si ocurre un desvío, derrumbe o falla mecánica, elige **Incidencia**, describe lo ocurrido y pulsa **Reportar incidencia**. El supervisor puede consultar la ficha y pulsar **Actualizar seguimiento**. Riesgo y Alertas siguen en el menú del supervisor. El doble factor protege a catadores y supervisores. Las cuatro cuentas importadas pertenecen al entorno local de desarrollo. En un despliegue se configuran el proveedor de identidad, las cuentas y las direcciones HTTPS propias del entorno.
 
 **Acceso opcional sin login.** Para recorrer las operaciones en un solo equipo, ejecuta `.\INICIAR-CAFE-JUNIN.cmd -OperadorLocal`. Esta opción utiliza la cuenta combinada y vincula el servidor a 127.0.0.1. Si ya se está ejecutando el portal, guarda tus formularios y cierra su consola antes de cambiar de modo.
 
-Ambos modos utilizan **state/cafejunin.mv.db**. Los lotes anteriores conservan su propietario. Para otro directorio configura CAFEJUNIN_DATA con la ruta base del archivo, sin extensión.
+Con el perfil predeterminado ambos modos utilizan **state/cafejunin.mv.db**. Para conectar tu instancia de SQL Server, sigue [la guía de base de datos](database/README.md). Los lotes anteriores conservan su propietario. Para otro directorio configura CAFEJUNIN_DATA con la ruta base del archivo, sin extensión.
 
 ## Editar y recompilar
 

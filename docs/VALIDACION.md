@@ -1,6 +1,12 @@
 # Validación de la entrega 0.2
 
-## Registro de calidad y persistencia local
+## Despacho y seguimiento de transporte
+
+Pasaron 22 pruebas Java en la suite habitual y 12 de React. También se ejecutó por separado la prueba JDBC optativa en SQL Server 2022 con el mismo adaptador que usa el portal. Los cuatro scripts se instalaron dos veces en una instancia temporal. La prueba leyó la ficha de cata, guardó el despacho y sus dos novedades, verificó que el reintento de un control conserva un solo evento y comprobó la reversión de la transacción.
+
+Con el JAR, H2 y un realm aislado de Keycloak se probó en Edge el recorrido entre cuentas. El productor registró una cosecha de 120.5 kg. El supervisor la asignó. El transportista confirmó 110.25 kg de carga, registró un control en Huancayo y reportó un derrumbe en La Oroya. En una vista de 390 px se registraron por separado el paso y la incidencia y se comprobó que la página cabía sin desplazamiento horizontal. El supervisor recuperó el reporte mediante **Actualizar seguimiento**. La prueba de API cubre también el acceso de otro conductor, los datos inválidos y los reintentos sin eventos duplicados.
+
+## Registro anterior de calidad y persistencia local
 
 - Java y Spring Boot. La suite verifica restricciones sensoriales, cómputo en el servidor, rechazo del puntaje manual, autorización por rol, umbral configurable, reintentos y reversión si falla el consumidor. Incluye reapertura de H2 en archivo. Se ejecutaron 21 pruebas con éxito. La prueba JDBC optativa para SQL Server requiere las credenciales del despliegue.
 - React. Pasaron nueve pruebas. Cubren la navegación por rol, el registro de cosecha desde Lotes, la previsualización del puntaje, los reintentos y la cancelación. Para las alertas se comprueba la recuperación de la evidencia tras un fallo de conexión y la consulta de la decisión cuando otro supervisor cierra la revisión.

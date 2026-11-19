@@ -74,8 +74,22 @@ class SqlServerIntegrationTest {
                   "test");
           assertEquals("CONFIRMADA", store.buscarAlerta(a.id()).orElseThrow().estado());
           assertEquals(1, store.calidadDe(id).size());
+          var conductor = new Cuenta("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4", "Conductor", Set.of("TRANSPORTISTA"), false);
+          var supervisor = new Cuenta("supervisor", "Supervisor", Set.of("SUPERVISOR"), false);
+          var seguimiento = new TransporteService(() -> supervisor, store, store, store, store, clock);
+          var viaje = new TransporteService(() -> conductor, store, store, store, store, clock);
+          seguimiento.asignar(id, conductor.subject());
+          viaje.despachar(id, "ABC123", BigDecimal.TEN);
+          var paso = UUID.randomUUID();
+          viaje.registrar(id, paso, Envio.Tipo.CONTROL, "Huancayo", "");
+          viaje.registrar(id, paso, Envio.Tipo.CONTROL, "Huancayo", "");
+          viaje.registrar(id, UUID.randomUUID(), Envio.Tipo.DERRUMBE, "La Oroya", "Paso interrumpido");
+          var trayecto = seguimiento.detalle(id);
+          assertEquals("ABC-123", trayecto.envio().placa());
+          assertEquals(List.of(Envio.Tipo.CONTROL, Envio.Tipo.DERRUMBE),
+              trayecto.novedades().stream().map(Envio.Novedad::tipo).toList());
           assertEquals(
-              5,
+              9,
               jdbc.queryForObject(
                   "SELECT COUNT(*) FROM dbo.outbox_eventos WHERE agregado_id=?",
                   Integer.class,
@@ -84,5 +98,6 @@ class SqlServerIntegrationTest {
           return null;
         });
     assertTrue(store.buscarLote(id).isEmpty());
+    assertTrue(store.novedades(id).isEmpty());
   }
 }

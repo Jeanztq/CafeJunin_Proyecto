@@ -1,12 +1,13 @@
 {
   "version": "0.2.0",
-  "verifiedAt": "2026-11-19T15:15:30.453270+00:00",
-  "jarSha256": "c85a00fb6dd747016d6dcdc153f63cfd1413ed5372180d5ceadc9b638b813cd9",
+  "verifiedAt": "2026-11-19T21:22:37.432989+00:00",
+  "jarSha256": "692ab5d834c2330a4e81b0eb97b48cb62bbedb5b3b283518e56ae9fb8066e10b",
   "java": {
-    "passed": 21,
-    "skippedSqlServer": 1
+    "passed": 22,
+    "skippedSqlServer": 1,
+    "sqlServerSeparada": "PASS"
   },
-  "reactPassed": 9,
+  "reactPassed": 12,
   "pythonPassed": 1,
   "httpIntegration": "PASS",
   "sqlServerLive": "TSQL_PASS",
@@ -15,5 +16,7 @@
   "localRestart": "PASS",
   "browser": "EDGE_PASS",
   "flutterTestsPassed": 2,
-  "androidApk": "NOT_RUN"
+  "androidApk": "NOT_RUN",
+  "transporteWeb": "EDGE_KEYCLOAK_H2_390PX_PASS",
+  "transporteSqlServer": "TSQL_AND_JDBC_PASS"
 }

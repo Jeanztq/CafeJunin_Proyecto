@@ -6,6 +6,10 @@
 4. Registra una taza con defecto leve y cero con defecto grave. El total baja a **85**. Si intentas registrar seis tazas afectadas o una nota fuera de escala, puedes corregirla antes de guardar.
 5. Confirma la evaluación. El servidor recalcula el puntaje y registra el protocolo, el catador, la fecha y el umbral comercial aplicado. Abre el detalle del lote para recuperar la ficha y sus movimientos, incluso después de reiniciar el portal.
 
+## Evidencias para el informe
+
+Para el informe final de HU08, documenta la ficha del catador, la corrección de un dato fuera de escala y el resultado recuperado desde el historial del mismo lote. En las capturas registra el identificador del lote y el puntaje obtenido. La ficha actual ya incluye taza limpia y apreciación global. Las referencias anteriores a ocho atributos corresponden a una versión previa.
+
 ## Método
 
 HU08 implementa la ficha clásica SCA de 2004 para cinco tazas. Siete atributos se puntúan en pasos de 0.25 de 6 a 10. Uniformidad, dulzor y taza limpia reciben 2 puntos por taza que cumple. Cada taza afectada se cuenta con la mayor intensidad observada. Se descuentan 2 puntos por defecto leve y 4 por grave. El protocolo posterior CVA tiene formularios propios.

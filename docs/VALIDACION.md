@@ -1,6 +1,13 @@
 # Validación de la entrega 0.2
 
-## Ejecutado en este entorno
+## Verificación del incremento HU08
+
+- Java y Spring Boot. La suite ejecutó 20 pruebas con éxito. Incluye rechazo de datos incompletos, autorización, umbrales de 79.5 y 80, idempotencia y una sola entrada de evento por ficha. La prueba JDBC optativa requiere configurar una conexión.
+- React. Pasaron seis pruebas, incluidas corrección de campos, reintento tras un fallo de red y cancelación.
+- Navegador. Edge recorrió el JAR en memoria desde el lote de ejemplo hasta la confirmación y la consulta tras recargar. Se comprobó que el formulario cabe a 390 px de ancho.
+- SQL Express. En una base temporal se aplicaron los scripts dos veces, se consultó una evaluación histórica y se verificó que la cabecera, los atributos y el evento se pueden confirmar o revertir en una transacción.
+
+## Evidencia histórica anterior al incremento HU08
 
 - Java 17: `mvn clean verify`, 20 pruebas descubiertas, **19 correctas y 1 omitida** (SQL Server). Dominio, aislamiento de capas, roles, propiedad, REST, rollback, umbral estricto, revisión, idempotencia, decorator y rechazo de respuesta IA inválida.
 - React: **4 pruebas correctas** con Vitest/jsdom. Menús de productor/supervisor, acceso seguro sin elegir privilegios y presentación de errores. Compilación Vite correcta. No se realizó QA visual en un navegador real.
@@ -9,9 +16,9 @@
 
 El JAR de `dist` incluye el portal compilado. El modelo incluido tiene ficha de procedencia y hash. Sus métricas corresponden a un dataset sintético, no a eficacia en campo.
 
-## Pendiente de ejecutar con infraestructura
+## Alcance de las pruebas de infraestructura
 
-- SQL Server: esquema/procedimientos y prueba `SqlServerIntegrationTest` preparados, pero **no ejecutados contra una instancia real**. La omisión es deliberada cuando RUN_SQLSERVER_TESTS no está activo; no equivale a una prueba aprobada.
+- El ensayo de procedimientos de HU08 usa SQL Express real. La suite JDBC optativa se habilita mediante RUN_SQLSERVER_TESTS y las variables de conexión indicadas en CONEXIONES.md.
 - Keycloak: realm, TOTP requerido, cliente PKCE y validación JWT implementados. Las pruebas HTTP usan JWT de prueba; no verifican un login interactivo, MFA ni logout contra un servidor Keycloak real.
 - Flutter: sin SDK disponible. Código de borradores SQLite entregado, sin compilación, emulador ni prueba física. No hay integración móvil autenticada ni sincronización.
 - Sin evaluación de carga, accesibilidad completa, tolerancia a fallos, backups ni cumplimiento íntegro de RNF. No se desplegó ni publicó en GitHub.

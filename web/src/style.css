@@ -479,3 +479,167 @@ footer {
     font-size: 28px;
   }
 }
+
+.portal-calidad > aside {
+  width: 208px;
+  padding: 24px;
+}
+.portal-calidad .brand {
+  letter-spacing: 0;
+}
+.portal-calidad .brand-sub {
+  font-size: 14px;
+  letter-spacing: 0;
+  color: #fffcf7;
+  margin: 18px 0;
+}
+.portal-calidad nav button.active {
+  border-radius: 0;
+  background: #f4e6cb;
+}
+.portal-calidad header {
+  min-height: 76px;
+}
+.portal-calidad main {
+  padding: 32px;
+}
+.calidad .modulo {
+  font-size: 12px;
+  color: #71685e;
+  margin-bottom: 16px;
+}
+.calidad h1 {
+  margin-bottom: 14px;
+}
+.contexto-lote {
+  color: #71685e;
+  margin-bottom: 18px;
+}
+.cata-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(215px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.calidad section {
+  padding: 20px;
+  border-color: #dfcfbc;
+}
+.calidad fieldset {
+  border: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 15px;
+}
+.calidad fieldset h3 {
+  font-size: 15px;
+  margin: 0;
+}
+.cata-pares {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+.campo-cata {
+  position: relative;
+  font-weight: 400;
+}
+.campo-cata span {
+  position: absolute;
+  z-index: 1;
+  top: -8px;
+  left: 12px;
+  padding: 0 4px;
+  font-size: 12px;
+  background: #fffcf7;
+}
+.campo-cata input,
+.campo-cata select {
+  height: 62px;
+  padding: 14px;
+  background: #fffcf7;
+  border: 1px solid #89828b;
+  border-radius: 4px;
+  font-size: 16px;
+}
+.acciones button {
+  justify-content: center;
+  min-height: 46px;
+  font-size: 14px;
+}
+.cata-ayuda h2 {
+  font:
+    bold 20px "DM Sans",
+    sans-serif;
+}
+.cata-ayuda ol {
+  padding-left: 20px;
+  color: #71685e;
+}
+.cata-ayuda p,
+.cata-aviso {
+  background: #f4e6cb;
+  border: 1px solid #dfcfbc;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 14px;
+  margin-bottom: 0;
+}
+.cata-aviso {
+  margin-bottom: 16px;
+}
+.ficha-resultado h2 {
+  font-size: 38px;
+  color: #32624a;
+  margin-bottom: 12px;
+}
+.ficha-resultado dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ficha-resultado dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.ficha-resultado dt {
+  color: #71685e;
+}
+.ficha-resultado details {
+  margin: 20px 0;
+}
+.ficha-resultado summary {
+  cursor: pointer;
+}
+@media (max-width: 900px) {
+  .cata-columnas {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 800px) {
+  .portal-calidad > aside {
+    width: 60px;
+    padding: 18px 6px;
+  }
+  .portal-calidad main {
+    padding: 18px 12px;
+  }
+}
+@media (max-width: 520px) {
+  .calidad section {
+    padding: 18px 12px;
+  }
+  .cata-pares {
+    grid-template-columns: 1fr;
+  }
+  .ficha-resultado dl {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+  .ficha-resultado dd {
+    margin-bottom: 12px;
+  }
+}

@@ -70,6 +70,10 @@ public final class MemoryStore
     lotes.put(lote.id(), lote);
   }
 
+  public synchronized Optional<EvaluacionCalidad> buscarParaRegistro(UUID id) {
+    return Optional.ofNullable(calidad.get(id));
+  }
+
   public synchronized void guardar(EvaluacionCalidad e) {
     if (calidad.containsKey(e.id())) throw new ConflictoException("Evaluación duplicada");
     calidad.put(e.id(), e);

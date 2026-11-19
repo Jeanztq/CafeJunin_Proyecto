@@ -1,5 +1,15 @@
-# Recorrido de demostración
+# Demostración de HU08
 
-Inicia INICIAR-DEMO.cmd. En Cosecha elige parcela, fecha pasada, variedad y peso. En Lotes abre su detalle. En Calidad guarda puntaje 85, cero defectos primarios y dos secundarios. En Riesgo IA usa humedad ambiental 95 y demora 60; el simulador local genera alerta. En Alertas confirma con motivo e instrucción y revisa el detalle del lote. Para mostrar XGBoost, inicia ai-service y cambia PREDICTOR_MODE=xgboost con la misma clave. Indica explícitamente que los datos del modelo son sintéticos.
+Abre la demo con **INICIAR-DEMO.cmd** y entra en http://localhost:8080. El módulo Calidad presenta un lote Bourbon de El Mirador, Satipo. Los valores siguientes sirven como muestra para la exposición.
 
-Para demostrar separación de actores utiliza Keycloak real con seguridad activa; la demo combinada no sirve como evidencia de login. Reinicia con SQL Server para conservar registros y probar persistencia.
+| Paso | Qué hacer | Qué observar |
+|---|---|---|
+| 1 · Captura | Elige el lote de 120.500 kg. Ingresa 0 defectos primarios y 2 secundarios. | El formulario muestra el origen y separa los defectos de los ocho atributos. |
+| 2 · Perfil sensorial | Ingresa fragancia 8, sabor 8.5, acidez 8, cuerpo 8.5, posgusto 8, balance 8, uniformidad 10 y dulzor 10. | Cada atributo usa una escala de 0 a 10. |
+| 3 · Corrección (CA03) | Escribe 105 como puntaje final y pulsa Registrar evaluación. | Aparece el rango válido. El foco vuelve al campo y los datos de la muestra siguen en pantalla. |
+| 4 · Confirmación (CA01) | Corrige el puntaje a 85 y vuelve a registrar. | El comprobante muestra el lote, la fecha, el catador de la sesión y la clasificación «Café especial». |
+| 5 · Consulta (CA02) | Abre Lotes y muestras, luego Ver detalle y Ver atributos sensoriales. | La ficha conserva los ocho valores, los defectos y el puntaje tras recargar el portal. |
+
+Para mostrar el límite, crea una ficha con 79.50 puntos. El historial conserva ambas muestras y clasifica la segunda como «Café comercial». Un puntaje de 80.00 ya alcanza el umbral acordado para este proyecto. El catador ingresa el puntaje final de forma independiente.
+
+En la demo el nombre del responsable es «Demostración local». Con seguridad activa, el servidor obtiene la identidad del token y exige el rol CATADOR. La emisión de certificados corresponde a otro alcance.

@@ -1,6 +1,9 @@
 package pe.cafejunin.adapters.out.persistence;
 
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import pe.cafejunin.domain.events.EvaluacionCalidadRegistrada;
 import java.util.*;
 import java.util.function.Supplier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -93,27 +96,41 @@ public final class SqlServerStore
         l.peso().kilogramos());
   }
 
-  public void guardar(EvaluacionCalidad e) {
-    call(
-        "sp_registrar_calidad",
-        e.id(),
-        e.loteId(),
-        e.defectosPrimarios(),
-        e.defectosSecundarios(),
-        e.puntajeSca());
+  public void guardar(EvaluacionCalidad ficha) {
+    var atributos = ficha.atributos();
+    call("sp_registrar_calidad", ficha.id(), ficha.loteId(),
+        ficha.defectosPrimarios(), ficha.defectosSecundarios(), ficha.puntajeSca(),
+        ficha.catadorId(), ficha.catadorNombre(), ficha.registradaEn().atOffset(ZoneOffset.UTC).toLocalDateTime(),
+        atributos.fragancia(), atributos.sabor(), atributos.acidez(), atributos.cuerpo(),
+        atributos.posgusto(), atributos.balance(), atributos.uniformidad(), atributos.dulzor());
+  }
+
+  private static final String COLUMNAS_CALIDAD =
+      "SELECT e.*, f.catador_id, f.catador_nombre, f.fragancia, f.sabor, f.acidez, f.cuerpo, "
+          + "f.posgusto, f.balance, f.uniformidad, f.dulzor FROM dbo.evaluaciones_calidad e ";
+  private static final String FICHA_DEL_LOTE =
+      "LEFT JOIN dbo.fichas_cata f ON f.evaluacion_id=e.id ";
+
+  private EvaluacionCalidad ficha(ResultSet r, int fila) throws SQLException {
+    String catador = r.getString("catador_id");
+    var atributos = catador == null ? null : new AtributosSensoriales(
+        r.getDouble("fragancia"), r.getDouble("sabor"), r.getDouble("acidez"), r.getDouble("cuerpo"),
+        r.getDouble("posgusto"), r.getDouble("balance"), r.getDouble("uniformidad"), r.getDouble("dulzor"));
+    return new EvaluacionCalidad(id(r, "id"), id(r, "lote_id"),
+        r.getInt("defectos_primarios"), r.getInt("defectos_secundarios"), r.getDouble("puntaje_sca"),
+        atributos, catador, r.getString("catador_nombre"),
+        r.getObject("registrado_en", LocalDateTime.class).toInstant(ZoneOffset.UTC));
+  }
+
+  public Optional<EvaluacionCalidad> buscarParaRegistro(UUID id) {
+    // El bloqueo de rango protege también un UUID que todavía no tiene fila.
+    return jdbc.query(COLUMNAS_CALIDAD + "WITH (UPDLOCK,HOLDLOCK) " + FICHA_DEL_LOTE
+        + "WHERE e.id=?", this::ficha, id.toString()).stream().findFirst();
   }
 
   public List<EvaluacionCalidad> calidadDe(UUID id) {
-    return jdbc.query(
-        "SELECT * FROM dbo.evaluaciones_calidad WHERE lote_id=? ORDER BY registrado_en,id",
-        (r, n) ->
-            new EvaluacionCalidad(
-                id(r, "id"),
-                id(r, "lote_id"),
-                r.getInt("defectos_primarios"),
-                r.getInt("defectos_secundarios"),
-                r.getDouble("puntaje_sca")),
-        id.toString());
+    return jdbc.query(COLUMNAS_CALIDAD + FICHA_DEL_LOTE + "WHERE e.lote_id=? ORDER BY e.registrado_en,e.id",
+        this::ficha, id.toString());
   }
 
   public void guardar(EvaluacionRiesgo e) {
@@ -199,8 +216,9 @@ public final class SqlServerStore
         e.id(),
         e.tipo(),
         e.agregadoId(),
-        Timestamp.from(e.ocurridoEn()),
-        e.version());
+        LocalDateTime.ofInstant(e.ocurridoEn(), ZoneOffset.UTC),
+        e.version(),
+        e instanceof EvaluacionCalidadRegistrada calidad ? calidad.evaluacionId() : null);
   }
 
   public <T> T ejecutar(Supplier<T> a) {

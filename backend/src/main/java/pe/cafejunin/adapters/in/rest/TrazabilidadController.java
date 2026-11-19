@@ -10,6 +10,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pe.cafejunin.application.ports.input.PortalUseCase;
+import pe.cafejunin.application.ports.input.RegistrarCalidadUseCase.Solicitud;
+import pe.cafejunin.domain.valueobjects.AtributosSensoriales;
 import pe.cafejunin.domain.builder.LoteBuilder;
 import pe.cafejunin.domain.entities.*;
 
@@ -47,6 +49,8 @@ public class TrazabilidadController {
       @NotNull @DecimalMin("0.001") @Digits(integer = 8, fraction = 3) BigDecimal pesoKg) {}
 
   public record CalidadRequest(
+      @NotNull UUID id,
+      @NotNull AtributosSensoriales atributos,
       @NotNull @Min(0) Integer defectosPrimarios,
       @NotNull @Min(0) Integer defectosSecundarios,
       @NotNull @DecimalMin("0") @DecimalMax("100") Double puntajeSca) {}
@@ -129,8 +133,7 @@ public class TrazabilidadController {
   @ResponseStatus(HttpStatus.CREATED)
   public EvaluacionCalidad calidad(@PathVariable UUID id, @Valid @RequestBody CalidadRequest r) {
     return portal.calidad(
-        new EvaluacionCalidad(
-            UUID.randomUUID(), id, r.defectosPrimarios(), r.defectosSecundarios(), r.puntajeSca()));
+        new Solicitud(r.id(), id, r.defectosPrimarios(), r.defectosSecundarios(), r.puntajeSca(), r.atributos()));
   }
 
   @PostMapping("/lotes/{id}/riesgos")

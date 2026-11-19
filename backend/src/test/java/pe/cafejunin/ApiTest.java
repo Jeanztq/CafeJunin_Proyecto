@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("memory")
 class ApiTest {
   @Autowired MockMvc mvc;
+  @Autowired pe.cafejunin.adapters.out.persistence.MemoryStore memoria;
 
   @Test
   void recorridoCompletoYValidaciones() throws Exception {
@@ -30,11 +31,32 @@ class ApiTest {
         .andExpect(status().isCreated());
     mvc.perform(post("/api/lotes").contentType(MediaType.APPLICATION_JSON).content(body))
         .andExpect(status().isCreated());
+    String ficha = """
+{"id":"%s","defectosPrimarios":0,"defectosSecundarios":2,"puntajeSca":85,"atributos":{"fragancia":8,"sabor":8.5,"acidez":8,"cuerpo":8.5,"posgusto":8,"balance":8,"uniformidad":10,"dulzor":10}}
+""".formatted(UUID.randomUUID());
     mvc.perform(
             post("/api/lotes/" + id + "/evaluaciones")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"defectosPrimarios\":0,\"defectosSecundarios\":2,\"puntajeSca\":85}"))
+                .content(ficha))
         .andExpect(status().isCreated());
+    var evaluaciones = "/api/lotes/" + id + "/evaluaciones";
+    mvc.perform(post(evaluaciones).contentType(MediaType.APPLICATION_JSON).content(ficha))
+        .andExpect(status().isCreated()).andExpect(jsonPath("$.catadorId").value("demo"));
+    mvc.perform(post(evaluaciones).contentType(MediaType.APPLICATION_JSON).content(ficha.replace("85,", "80,")))
+        .andExpect(status().isConflict());
+    for (String invalida : new String[] {ficha.replace("85,", "105,"), ficha.replace("8.5", "12.5"),
+        ficha.replace("\"dulzor\":10", "\"dulzor\":null"), ficha.replace("\"fragancia\":8,", ""),
+        ficha.replace("\"defectosPrimarios\":0", "\"defectosPrimarios\":0.5")}) {
+      mvc.perform(post(evaluaciones).contentType(MediaType.APPLICATION_JSON).content(invalida))
+          .andExpect(status().isBadRequest());
+    }
+    var eventos = memoria.eventosPendientes().stream()
+        .filter(e -> e.agregadoId().toString().equals(id) && e.tipo().equals("EvaluacionCalidadRegistrada")).toList();
+    org.junit.jupiter.api.Assertions.assertEquals(1, eventos.size());
+    org.junit.jupiter.api.Assertions.assertEquals(2, eventos.get(0).version());
+    mvc.perform(get("/api/lotes/" + id + "/detalle")).andExpect(jsonPath("$.calidad.length()").value(1))
+        .andExpect(jsonPath("$.calidad[0].atributos.sabor").value(8.5))
+        .andExpect(jsonPath("$.calidad[0].clasificacion").value("Café especial"));
     mvc.perform(
             post("/api/lotes/" + id + "/riesgos")
                 .contentType(MediaType.APPLICATION_JSON)

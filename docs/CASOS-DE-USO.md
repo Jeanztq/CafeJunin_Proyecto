@@ -9,7 +9,10 @@ Convención: GIVEN–WHEN–THEN (Dado–Cuando–Entonces).
 | Cosecha | Parcela propia y campos válidos | Guarda | Lote y evento atómicos |
 | Reintento cosecha | UUID ya registrado con idénticos datos | Reenvía | Un solo lote y evento |
 | Conflicto cosecha | UUID existente con otro peso | Reenvía | 409 sin sobrescribir |
-| Calidad | Catador y lote existente | Registra defectos/puntaje válidos | Evaluación y evento asociados al lote |
+| HU08 · CA01 | Catador y lote existente | Confirma defectos, ocho atributos y puntaje | Ficha, catador, fecha y evento dentro de la misma transacción |
+| HU08 · CA02 | Ficha registrada | Abre el detalle del lote | Puede consultar todos los atributos, defectos, puntaje y clasificación |
+| HU08 · CA03 | Ficha incompleta o fuera de escala | Intenta registrar | Puede corregir los campos sin guardar una evaluación |
+| HU08 · Reintento | Ficha ya confirmada | Repite el mismo envío | Devuelve la ficha original y conserva un único evento |
 | Umbral IA | Predictor devuelve exactamente 0.70 | Evalúa | No genera alerta |
 | Umbral IA | Predictor devuelve 0.7001 | Evalúa | Genera alerta PENDIENTE y evento |
 | Caída IA | Servicio no disponible | Evalúa | 503 y ninguna evaluación nueva |
@@ -19,4 +22,4 @@ Convención: GIVEN–WHEN–THEN (Dado–Cuando–Entonces).
 | Revisión final | Alerta ya decidida | Intenta cambiar decisión | 409 |
 | Atomicidad | Repositorio de eventos falla | Guarda operación | Se revierte el cambio de negocio |
 
-La ficha de calidad completa, la telemetría y las notificaciones en tiempo real no se incluyen en este incremento. La deduplicación de cosecha todavía no resuelve por sí sola todos los conflictos offline.
+La telemetría y las notificaciones en tiempo real no se incluyen en este incremento. La deduplicación de cosecha todavía no resuelve por sí sola todos los conflictos offline.

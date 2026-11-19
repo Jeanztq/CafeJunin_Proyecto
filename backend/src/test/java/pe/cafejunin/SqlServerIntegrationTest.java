@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
+import pe.cafejunin.application.ports.input.RegistrarCalidadUseCase.Solicitud;
+import pe.cafejunin.domain.valueobjects.AtributosSensoriales;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -40,8 +42,13 @@ class SqlServerIntegrationTest {
                   .peso(BigDecimal.TEN)
                   .build();
           new RegistrarCosechaService(store, store, store, clock).ejecutar(l);
-          new RegistrarCalidadService(store, store, store, store, clock)
-              .ejecutar(new EvaluacionCalidad(UUID.randomUUID(), id, 0, 1, 85));
+          var calidad = new RegistrarCalidadService(store, store, store::agregar, store, clock);
+          var catador = new Cuenta("q1", "Ana", Set.of("CATADOR"), false);
+          var solicitud = new Solicitud(UUID.randomUUID(), id, 0, 1, 85,
+              new AtributosSensoriales(8d, 8.5, 8d, 8.5, 8d, 8d, 10d, 10d));
+          var ficha = calidad.ejecutar(solicitud, catador);
+          assertEquals(ficha, calidad.ejecutar(solicitud, catador));
+          assertEquals(ficha, store.calidadDe(id).get(0));
           new EvaluarRiesgoService(
                   store,
                   store,

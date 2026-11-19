@@ -21,7 +21,9 @@ Factory no crea procedimientos almacenados. Los procedimientos se definen en T-S
 
 Cada escritura de negocio y su sobre de evento se guardan en la misma unidad de trabajo. En SQL Server participa TransactionTemplate; en memoria se usa snapshot y rollback sincronizado. El servicio de predicción se llama antes de abrir la transacción para evitar mantener bloqueos mientras se espera HTTP.
 
-Outbox almacena identificador, tipo, agregado, instante y versión; no el contenido completo del evento. Aún no tiene publicador, broker, confirmación de envío, consumidores, reintentos durables ni deduplicación de consumidores. Por ello esta entrega incorpora la base transaccional para eventos, no una arquitectura distribuida event driven completa. Antes de añadir consumidores se deben versionar payloads y su política de entrega. No se introduce Kafka solo por tener cliente móvil.
+En HU08, RegistrarCalidadService valida el rol, comprueba el lote y reconoce reintentos por UUID de ficha. Persiste la evaluación y publica EvaluacionCalidadRegistrada a través de PublicarCalidadPort. Spring entrega el evento al consumidor local EncolarCalidadRegistrada, que escribe el sobre en el outbox dentro de la misma transacción. Un fallo del consumidor revierte la ficha. El sobre de calidad versión 2 identifica tanto el lote como la evaluación. Los sobres previos conservan su versión.
+
+La entrega al consumidor local es síncrona. La tabla outbox conserva eventos pendientes para un futuro publicador externo. El flujo de la ficha se ejecuta en un solo backend.
 
 ## Acceso y límites
 

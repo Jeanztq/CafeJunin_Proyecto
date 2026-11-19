@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.UUID;
+import pe.cafejunin.application.ports.input.RegistrarCalidadUseCase.Solicitud;
 import org.junit.jupiter.api.Test;
 import pe.cafejunin.adapters.out.persistence.MemoryStore;
 import pe.cafejunin.adapters.out.prediction.SimuladorRiesgoAdapter;
@@ -87,13 +88,26 @@ class CasosDeUsoTest {
 
   @Test
   void calidadExigeLoteExistente() {
-    var uc = new RegistrarCalidadService(db, db, db, db, clock);
-    assertThrows(
-        NoEncontradoException.class,
-        () -> uc.ejecutar(new EvaluacionCalidad(UUID.randomUUID(), UUID.randomUUID(), 0, 1, 85)));
-    Lote l = cosecha().ejecutar(lote());
-    assertEquals(
-        85, uc.ejecutar(new EvaluacionCalidad(UUID.randomUUID(), l.id(), 0, 1, 85)).puntajeSca());
+    var catador = new Cuenta("q1", "Ana", java.util.Set.of("CATADOR"), false);
+    var uc = new RegistrarCalidadService(db, db, db::agregar, db, clock);
+    var atributos = new AtributosSensoriales(8d, 8d, 8d, 8d, 8d, 8d, 10d, 10d);
+    var l = lote();
+    var solicitud = new Solicitud(UUID.randomUUID(), l.id(), 0, 1, 79.5, atributos);
+    assertThrows(NoEncontradoException.class, () -> uc.ejecutar(solicitud, catador));
+    cosecha().ejecutar(l);
+    var falla = new RegistrarCalidadService(db, db, evento -> {
+      throw new IllegalStateException("Outbox no disponible");
+    }, db, clock);
+    assertThrows(IllegalStateException.class, () -> falla.ejecutar(solicitud, catador));
+    assertTrue(db.calidadDe(l.id()).isEmpty());
+    var ficha = uc.ejecutar(solicitud, catador);
+    assertEquals("Café comercial", ficha.getClasificacion());
+    assertEquals(ficha, uc.ejecutar(solicitud, catador));
+    assertEquals(2, db.eventosPendientes().size());
+    var segunda = new Solicitud(UUID.randomUUID(), l.id(), 0, 1, 80, atributos);
+    assertEquals("Café especial", uc.ejecutar(segunda, catador).getClasificacion());
+    assertThrows(ProhibidoException.class, () -> uc.ejecutar(segunda,
+        new Cuenta("p1", "Eva", java.util.Set.of("PRODUCTOR"), false)));
   }
 
   @Test

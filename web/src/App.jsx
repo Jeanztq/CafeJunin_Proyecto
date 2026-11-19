@@ -11,6 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { api } from "./api";
+import Calidad, { ResultadoCalidad } from "./Calidad";
 const labels = {
   PRODUCTOR: "Productor",
   CATADOR: "Catador Q-Grader",
@@ -56,7 +57,7 @@ export default function App({ config, identity }) {
         ]
       : []),
   ];
-  async function refresh() {
+  async function refresh(inicial = false) {
     const a = await api("/me");
     setAccount(a);
     const [l, p, al] = await Promise.all([
@@ -67,24 +68,27 @@ export default function App({ config, identity }) {
     setLots(l);
     setParcels(p);
     setAlerts(al);
+    if (inicial && a.roles.includes("CATADOR")) setPage("Calidad");
   }
   useEffect(() => {
     if (config.seguridadActiva && !identity?.authenticated) {
       setLoading(false);
       return;
     }
-    refresh()
+    refresh(true)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
-  async function action(fn) {
+  async function action(fn, escritura = true) {
     setError("");
     setNotice("");
     setBusy(true);
     try {
       await fn();
-      await refresh();
-      setNotice("Operación registrada correctamente.");
+      if (escritura) {
+        await refresh();
+        setNotice("Operación registrada correctamente.");
+      }
     } catch (e) {
       setError(e.message);
     } finally {
@@ -102,16 +106,6 @@ export default function App({ config, identity }) {
         });
         setLotId(crypto.randomUUID());
         setPage("Lotes");
-      }
-      if (type === "calidad") {
-        await api(`/lotes/${f.loteId}/evaluaciones`, {
-          method: "POST",
-          body: JSON.stringify({
-            defectosPrimarios: Number(f.defectosPrimarios),
-            defectosSecundarios: Number(f.defectosSecundarios),
-            puntajeSca: Number(f.puntajeSca),
-          }),
-        });
       }
       if (type === "riesgo") {
         setResult(
@@ -176,17 +170,20 @@ export default function App({ config, identity }) {
       </main>
     );
   return (
-    <div className="shell">
+    <div className={page === "Calidad" ? "shell portal-calidad" : "shell"}>
       <aside>
         <div className="brand">
           <Coffee /> CAFÉ JUNÍN
         </div>
-        <p className="brand-sub">TRAZABILIDAD DEL CAFÉ</p>
+        <p className="brand-sub">
+          {page === "Calidad" ? "Catador Q Grader" : "TRAZABILIDAD DEL CAFÉ"}
+        </p>
         <nav aria-label="Módulos">
           {menus.map(([name, Icon]) => (
             <button
               key={name}
               className={page === name ? "active" : ""}
+              aria-current={page === name ? "page" : undefined}
               onClick={() => {
                 setPage(name);
                 setDetail(null);
@@ -195,7 +192,7 @@ export default function App({ config, identity }) {
               }}
             >
               <Icon size={19} />
-              {name}
+              {name === "Lotes" && can("CATADOR") ? "Lotes y muestras" : name}
               {name === "Alertas" && (
                 <b>{alerts.filter((a) => a.estado === "PENDIENTE").length}</b>
               )}
@@ -205,13 +202,17 @@ export default function App({ config, identity }) {
         <div className="aside-bottom">
           <span>COOPERATIVA · PILOTO</span>
           <p>Junín, Perú</p>
-          <small>Entrega 0.2 · Flujo inicial</small>
+          <small>
+            {account?.demostracion
+              ? "Demostración local"
+              : "Portal de operaciones"}
+          </small>
         </div>
       </aside>
       <div className="workspace">
         <header>
           <span>
-            Portal de trazabilidad <span className="sep">/</span> {page}
+            Portal web <span className="sep">/</span> {page}
           </span>
           <div className="account">
             <span>
@@ -234,28 +235,30 @@ export default function App({ config, identity }) {
           </div>
         </header>
         <main>
-          {!config.seguridadActiva && (
+          {!config.seguridadActiva && page !== "Calidad" && (
             <div className="banner">
               DEMOSTRACIÓN LOCAL · Sin inicio de sesión. Reúne permisos de
               prueba; no usar expuesto a Internet.
             </div>
           )}
-          <div className="page-title">
-            <div>
-              <span className="eyebrow">CAFÉ JUNÍN / OPERACIONES</span>
-              <h1>{page}</h1>
-              <p>
-                {page === "Inicio"
-                  ? "El origen, la calidad y el riesgo de tus lotes, en un mismo lugar."
-                  : "Registra y consulta la información autorizada para tu cuenta."}
-              </p>
+          {page !== "Calidad" && (
+            <div className="page-title">
+              <div>
+                <span className="eyebrow">CAFÉ JUNÍN / OPERACIONES</span>
+                <h1>{page}</h1>
+                <p>
+                  {page === "Inicio"
+                    ? "El origen, la calidad y el riesgo de tus lotes, en un mismo lugar."
+                    : "Registra y consulta la información autorizada para tu cuenta."}
+                </p>
+              </div>
+              <span className="pill">
+                {config.predictor === "rules"
+                  ? "Reglas de demostración"
+                  : "Servicio XGBoost"}
+              </span>
             </div>
-            <span className="pill">
-              {config.predictor === "rules"
-                ? "Reglas de demostración"
-                : "Servicio XGBoost"}
-            </span>
-          </div>
+          )}
           {error && (
             <div role="alert" className="error">
               {error}
@@ -367,10 +370,12 @@ export default function App({ config, identity }) {
                             <button
                               className="secondary"
                               onClick={() =>
-                                action(async () =>
-                                  setDetail(
-                                    await api(`/lotes/${l.id}/detalle`),
-                                  ),
+                                action(
+                                  async () =>
+                                    setDetail(
+                                      await api(`/lotes/${l.id}/detalle`),
+                                    ),
+                                  false,
                                 )
                               }
                             >
@@ -394,11 +399,16 @@ export default function App({ config, identity }) {
                   <h4>Calidad</h4>
                   {detail.calidad.length ? (
                     detail.calidad.map((q) => (
-                      <p key={q.id}>
-                        {q.puntajeSca} puntos SCA · Defectos:{" "}
-                        {q.defectosPrimarios} primarios, {q.defectosSecundarios}{" "}
-                        secundarios
-                      </p>
+                      <article key={q.id}>
+                        {q.registradaEn && (
+                          <small>
+                            {new Date(q.registradaEn).toLocaleString("es-PE", {
+                              timeZone: "America/Lima",
+                            })}
+                          </small>
+                        )}
+                        <ResultadoCalidad ficha={q} />
+                      </article>
                     ))
                   ) : (
                     <p>Sin evaluaciones.</p>
@@ -478,50 +488,12 @@ export default function App({ config, identity }) {
               </form>
             </section>
           )}
-          {page === "Calidad" && (
-            <section className="form-panel">
-              <h2>Evaluación de calidad</h2>
-              <p className="muted">
-                Registro básico de defectos y puntaje SCA. El formulario
-                sensorial completo queda para la siguiente fase.
-              </p>
-              <form onSubmit={(e) => submit(e, "calidad")}>
-                {lotSelect}
-                <div className="form-grid">
-                  <Field label="Defectos primarios">
-                    <input
-                      type="number"
-                      name="defectosPrimarios"
-                      min="0"
-                      step="1"
-                      required
-                    />
-                  </Field>
-                  <Field label="Defectos secundarios">
-                    <input
-                      type="number"
-                      name="defectosSecundarios"
-                      min="0"
-                      step="1"
-                      required
-                    />
-                  </Field>
-                  <Field label="Puntaje SCA">
-                    <input
-                      type="number"
-                      name="puntajeSca"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      required
-                    />
-                  </Field>
-                </div>
-                <button disabled={busy || !lots.length}>
-                  Guardar evaluación
-                </button>
-              </form>
-            </section>
+          {!loading && page === "Calidad" && can("CATADOR") && (
+            <Calidad
+              lotes={lots}
+              parcelas={parcels}
+              cancelar={() => setPage("Lotes")}
+            />
           )}
           {page === "Riesgo IA" && (
             <section className="form-panel">

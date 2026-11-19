@@ -1,10 +1,17 @@
 package pe.cafejunin.domain.entities;
 
+import java.time.Instant;
 import java.util.Objects;
+import pe.cafejunin.domain.valueobjects.AtributosSensoriales;
 import java.util.UUID;
 
 public record EvaluacionCalidad(
-    UUID id, UUID loteId, int defectosPrimarios, int defectosSecundarios, double puntajeSca) {
+    UUID id, UUID loteId, int defectosPrimarios, int defectosSecundarios, double puntajeSca,
+    AtributosSensoriales atributos, String catadorId, String catadorNombre, Instant registradaEn) {
+  public String getClasificacion() {
+    return puntajeSca >= 80 ? "Café especial" : "Café comercial";
+  }
+
   public EvaluacionCalidad {
     Objects.requireNonNull(id);
     Objects.requireNonNull(loteId);

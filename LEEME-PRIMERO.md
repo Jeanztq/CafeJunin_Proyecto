@@ -2,11 +2,10 @@
 
 ## Ver el portal en cinco minutos
 
-1. Extrae todo el ZIP; conserva `CafeJuninV2` como carpeta separada de la versión anterior.
-2. Instala JDK 17 y comprueba `java -version`.
-3. En Windows ejecuta `INICIAR-DEMO.cmd`, o desde esta carpeta: `java -jar dist/cafejunin-backend-0.2.0.jar --spring.profiles.active=memory`.
-4. Abre http://localhost:8080. La demo no pide credenciales, muestra el aviso correspondiente y guarda datos solo en memoria.
-5. Registra una cosecha con una parcela de la lista, consulta Lotes, registra Calidad y prueba Riesgo con humedad ambiental 95 y demora 60. En el simulador esto crea una alerta. Confírmala con motivo e instrucción o descártala con motivo.
+1. Comprueba que Java sea versión 17 o posterior con `java -version`.
+2. Ejecuta `INICIAR-DEMO.cmd` desde la carpeta del proyecto y abre http://localhost:8080.
+3. En Calidad aparece el lote de ejemplo. Sigue [el guion de HU08](docs/GUION-DEMO.md) para registrar y consultar la ficha.
+4. Para crear otra muestra, puedes abrir Cosecha y registrar otro lote. Una segunda evaluación del mismo lote también recibe un identificador propio.
 
 Al detener la demo se pierden sus registros. El JAR ya contiene React; no hace falta Node ni Maven para verla. No exponer este modo a Internet.
 
@@ -25,7 +24,3 @@ Sigue **docs/CONEXIONES.md** para SQL Server, Keycloak, XGBoost y GitHub. Son pa
 ## Escritorio de Windows
 
 `./scripts/Instalar-En-Escritorio.ps1` copia el proyecto a una carpeta nueva `CafeJuninV2` en tu Escritorio y se detiene si ya existe, para no sobrescribir cambios. No se puede ejecutar desde este entorno en tu computadora.
-
-## Próximo paso contigo
-
-Primero ejecutar SQL Server y Keycloak en tu PC y verificar acceso con productor, catador y supervisor. Después completar la ficha de calidad y la autenticación/sincronización móvil. No necesitas una app de escritorio específica para seguir; sí un entorno de Codex con acceso a la carpeta del proyecto si quieres que modifique y pruebe tus archivos directamente.

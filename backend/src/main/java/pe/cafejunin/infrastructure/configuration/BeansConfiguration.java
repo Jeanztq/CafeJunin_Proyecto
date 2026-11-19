@@ -2,6 +2,13 @@ package pe.cafejunin.infrastructure.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
+import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.util.UUID;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import pe.cafejunin.domain.builder.LoteBuilder;
+import pe.cafejunin.domain.entities.Lote;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,6 +33,19 @@ public class BeansConfiguration {
   @Profile("memory")
   MemoryStore memoria() {
     return new MemoryStore();
+  }
+
+  @Bean
+  @Profile("memory")
+  @ConditionalOnProperty(name = "app.demo.lote", havingValue = "true")
+  ApplicationRunner prepararLoteDemo(RegistrarCosechaUseCase cosecha, Clock reloj) {
+    return args -> cosecha.ejecutar(new LoteBuilder()
+        .identificado(UUID.fromString("cafe2401-0000-4000-8000-000000000001"))
+        .deParcela(MemoryStore.PARCELA_DEMO)
+        .cosechado(LocalDate.now(reloj).minusDays(1))
+        .variedad(Lote.Variedad.BOURBON)
+        .recoleccion(Lote.TipoRecoleccion.SELECTIVA)
+        .peso(new BigDecimal("120.500")).build());
   }
 
   @Bean
@@ -58,10 +78,10 @@ public class BeansConfiguration {
   RegistrarCalidadUseCase calidad(
       LoteRepositoryPort l,
       CalidadRepositoryPort q,
-      EventoRepositoryPort e,
+      org.springframework.context.ApplicationEventPublisher publicador,
       UnidadTrabajoPort t,
       Clock c) {
-    return new RegistrarCalidadService(l, q, e, t, c);
+    return new RegistrarCalidadService(l, q, publicador::publishEvent, t, c);
   }
 
   @Bean

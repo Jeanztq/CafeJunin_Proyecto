@@ -6,4 +6,6 @@ Parcelas incluye propietario_subject vinculado al `sub` OIDC. No se almacenan co
 
 Una alerta referencia una evaluación de riesgo y permite una decisión final con motivo/instrucción, responsable, instante y operacion_id. `sp_revisar_alerta` actualiza solo PENDIENTE y detecta competencia con THROW 51001; el adaptador lo traduce a conflicto. Negocio y outbox participan en la misma transacción de Spring.
 
-Los scripts 00..03 no eliminan tablas existentes. CREATE OR ALTER actualiza procedimientos; para cambios futuros de columnas se deberán crear migraciones incrementales. Tablas sensoriales, transporte, sesiones móviles, auditoría general y cooperativas múltiples aún no están modeladas. No asumir que este esquema es la base de datos definitiva del informe.
+Los scripts 00..03 no eliminan tablas existentes. CREATE OR ALTER actualiza procedimientos; para cambios futuros de columnas se deberán crear migraciones incrementales. Transporte, sesiones móviles, auditoría general y cooperativas múltiples aún no están modeladas. No asumir que este esquema es la base de datos definitiva del informe.
+
+HU08 guarda la cabecera en evaluaciones_calidad y el perfil sensorial en fichas_cata. Ambas comparten el UUID de la evaluación. Las ocho columnas sensoriales llevan límites de 0 a 10. Una evaluación histórica sin perfil sensorial conserva el puntaje original. La identidad del catador y su nombre al registrar permiten reconstruir quién evaluó cada muestra.

@@ -22,7 +22,7 @@ public interface PortalUseCase {
 
   Lote cosecha(Lote lote);
 
-  EvaluacionCalidad calidad(EvaluacionCalidad evaluacion);
+  EvaluacionCalidad calidad(RegistrarCalidadUseCase.Solicitud solicitud);
 
   EvaluacionRiesgo riesgo(UUID id, double humedad, double demora);
 

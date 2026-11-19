@@ -1,6 +1,8 @@
-# Café Junín · Entrega 0.2
+# Café Junín · Trazabilidad logística del café
 
-Sistema de trazabilidad del café. Un backend compartido para portal web y futuro cliente móvil sincronizado. Empieza por **LEEME-PRIMERO.md**. Esta entrega amplía la versión anterior en una carpeta independiente.
+La historia elegida para la entrega final es **HU08 · Registrar la evaluación física y sensorial**. El catador registra una ficha, corrige los valores fuera de escala y consulta el resultado desde el historial del lote.
+
+**Demo en Windows.** Con Java 17 o posterior, ejecuta `INICIAR-DEMO.cmd` y abre [el portal local](http://localhost:8080). Se abre Calidad con un lote Bourbon de 120.500 kg de El Mirador. La demo usa memoria y una cuenta local de prueba. Los datos se conservan durante esa ejecución. Consulta el [guion con los tres criterios de aceptación](docs/GUION-DEMO.md) y la [arquitectura y patrones](docs/ARQUITECTURA.md).
 
 | Carpeta | Contenido |
 |---|---|
@@ -16,6 +18,4 @@ Sistema de trazabilidad del café. Un backend compartido para portal web y futur
 | docs | Arquitectura, alcance, conexiones, contrato y evidencia |
 | .github/workflows | CI Java, React y Python, preparado para GitHub |
 
-Recorrido integrado: cosecha → evaluación básica de calidad → riesgo → alerta si probabilidad **mayor que 70%** → confirmación o descarte por supervisor. En demo, una identidad reúne permisos para recorrerlo. Con autenticación, cada cuenta recibe sus módulos y los permisos se verifican también en backend.
-
-No equivale a las 19 historias priorizadas completas. SQL Server y Keycloak están preparados pero pendientes de prueba real. El modelo XGBoost es real como implementación, pero su entrenamiento sintético no aporta evidencia predictiva agronómica. No usar para decisiones operativas.
+Los módulos de cosecha, predicción y revisión de alertas siguen disponibles por rol. La IA de demostración se entrenó con datos sintéticos. HU08 funciona sin el servicio de IA. Para compilar el proyecto o configurar persistencia y autenticación, consulta [la guía de inicio](LEEME-PRIMERO.md).

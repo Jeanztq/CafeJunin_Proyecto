@@ -3,7 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
--- Aquí continúa el resto de tu script original (CREATE TABLE, CREATE INDEX, etc.)
+-- Esquema compartido por los adaptadores JDBC del portal.
 
 IF OBJECT_ID(N'dbo.parcelas',N'U') IS NULL
  CREATE TABLE dbo.parcelas (id uniqueidentifier PRIMARY KEY,nombre nvarchar(160) NOT NULL,ubicacion nvarchar(250) NOT NULL,propietario_subject nvarchar(200) NOT NULL);
@@ -26,4 +26,27 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='ix_lotes_parcela' AND object_id=OBJECT_ID('dbo.lotes')) CREATE INDEX ix_lotes_parcela ON dbo.lotes(parcela_id);
 GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='ix_outbox_pendientes' AND object_id=OBJECT_ID('dbo.outbox_eventos')) CREATE INDEX ix_outbox_pendientes ON dbo.outbox_eventos(ocurrido_en) WHERE publicado_en IS NULL;
+GO
+
+-- Las evaluaciones anteriores a HU08 siguen disponibles sin atribuirles datos de cata.
+IF OBJECT_ID(N'dbo.fichas_cata', N'U') IS NULL
+ CREATE TABLE dbo.fichas_cata (
+   evaluacion_id uniqueidentifier PRIMARY KEY REFERENCES dbo.evaluaciones_calidad(id),
+   catador_id nvarchar(255) NOT NULL,
+   catador_nombre nvarchar(255) NOT NULL,
+   fragancia float NOT NULL CHECK (fragancia BETWEEN 0 AND 10),
+   sabor float NOT NULL CHECK (sabor BETWEEN 0 AND 10),
+   acidez float NOT NULL CHECK (acidez BETWEEN 0 AND 10),
+   cuerpo float NOT NULL CHECK (cuerpo BETWEEN 0 AND 10),
+   posgusto float NOT NULL CHECK (posgusto BETWEEN 0 AND 10),
+   balance float NOT NULL CHECK (balance BETWEEN 0 AND 10),
+   uniformidad float NOT NULL CHECK (uniformidad BETWEEN 0 AND 10),
+   dulzor float NOT NULL CHECK (dulzor BETWEEN 0 AND 10)
+ );
+GO
+IF COL_LENGTH('dbo.outbox_eventos', 'evaluacion_id') IS NULL
+ ALTER TABLE dbo.outbox_eventos ADD evaluacion_id uniqueidentifier NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID('dbo.evaluaciones_calidad') AND name='ix_calidad_lote')
+ CREATE INDEX ix_calidad_lote ON dbo.evaluaciones_calidad(lote_id,registrado_en,id);
 GO

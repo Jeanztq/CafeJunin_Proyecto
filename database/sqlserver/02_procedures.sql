@@ -1,13 +1,27 @@
 USE cafejunin;
 GO
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
 CREATE OR ALTER PROCEDURE dbo.sp_registrar_lote @id uniqueidentifier,@parcela uniqueidentifier,@fecha date,@variedad varchar(30),@tipo varchar(30),@peso decimal(11,3)
 AS BEGIN SET NOCOUNT ON; SET XACT_ABORT ON;
 INSERT dbo.lotes(id,parcela_id,fecha_cosecha,variedad,tipo_recoleccion,peso_kg) VALUES(@id,@parcela,@fecha,@variedad,@tipo,@peso);
 END;
 GO
-CREATE OR ALTER PROCEDURE dbo.sp_registrar_calidad @id uniqueidentifier,@lote uniqueidentifier,@p int,@s int,@puntaje float
-AS BEGIN SET NOCOUNT ON; SET XACT_ABORT ON;
-INSERT dbo.evaluaciones_calidad(id,lote_id,defectos_primarios,defectos_secundarios,puntaje_sca) VALUES(@id,@lote,@p,@s,@puntaje);
+CREATE OR ALTER PROCEDURE dbo.sp_registrar_calidad
+ @id uniqueidentifier, @lote uniqueidentifier, @p int, @s int, @puntaje float,
+ @catador nvarchar(255), @nombre nvarchar(255), @fecha datetime2,
+ @fragancia float, @sabor float, @acidez float, @cuerpo float,
+ @posgusto float, @balance float, @uniformidad float, @dulzor float
+AS BEGIN
+ SET NOCOUNT ON;
+ SET XACT_ABORT ON;
+ BEGIN TRANSACTION;
+ INSERT dbo.evaluaciones_calidad(id,lote_id,defectos_primarios,defectos_secundarios,puntaje_sca,registrado_en)
+ VALUES(@id,@lote,@p,@s,@puntaje,@fecha);
+ INSERT dbo.fichas_cata(evaluacion_id,catador_id,catador_nombre,fragancia,sabor,acidez,cuerpo,posgusto,balance,uniformidad,dulzor)
+ VALUES(@id,@catador,@nombre,@fragancia,@sabor,@acidez,@cuerpo,@posgusto,@balance,@uniformidad,@dulzor);
+ COMMIT;
 END;
 GO
 CREATE OR ALTER PROCEDURE dbo.sp_registrar_riesgo @id uniqueidentifier,@lote uniqueidentifier,@humedad float,@demora float,@prob float,@modelo nvarchar(160),@simulada bit,@alerta bit
@@ -27,8 +41,8 @@ IF @estado NOT IN ('CONFIRMADA','DESCARTADA') THROW 51002,'Estado de revisión i
  IF @@ROWCOUNT<>1 THROW 51001,'La alerta ya fue revisada',1;
 END;
 GO
-CREATE OR ALTER PROCEDURE dbo.sp_encolar_evento @id uniqueidentifier,@tipo nvarchar(100),@agregado uniqueidentifier,@fecha datetime2,@version int
+CREATE OR ALTER PROCEDURE dbo.sp_encolar_evento @id uniqueidentifier,@tipo nvarchar(100),@agregado uniqueidentifier,@fecha datetime2,@version int,@evaluacion uniqueidentifier=NULL
 AS BEGIN SET NOCOUNT ON; SET XACT_ABORT ON;
-INSERT dbo.outbox_eventos(id,tipo,agregado_id,ocurrido_en,version) VALUES(@id,@tipo,@agregado,@fecha,@version);
+INSERT dbo.outbox_eventos(id,tipo,agregado_id,ocurrido_en,version,evaluacion_id) VALUES(@id,@tipo,@agregado,@fecha,@version,@evaluacion);
 END;
 GO

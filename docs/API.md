@@ -1,6 +1,6 @@
 # API 0.2
 
-Base `/api`. JSON. Seguridad activa: Bearer JWT salvo config/info. Las operaciones verifican rol y pertenencia en PortalFacade.
+Base `/api`. JSON. Seguridad activa: Bearer JWT salvo config/info. Las operaciones verifican rol y pertenencia en la aplicación.
 
 | Método/ruta | Operación |
 |---|---|
@@ -10,14 +10,29 @@ Base `/api`. JSON. Seguridad activa: Bearer JWT salvo config/info. Las operacion
 | GET /lotes | Lotes autorizados |
 | POST /lotes | Productor: cosecha |
 | GET /lotes/{id}/detalle | Lote, calidad y, solo supervisor, riesgos/alertas |
-| POST /lotes/{id}/evaluaciones | Catador: registro básico de calidad |
+| POST /lotes/{id}/evaluaciones | Catador · registro de ficha física y sensorial |
 | POST /lotes/{id}/riesgos | Supervisor: llamar predictor y guardar riesgo |
 | GET /alertas | Supervisor: alertas |
 | PUT /alertas/{id}/decision | Supervisor: confirmar/descartar |
 
 Cosecha: `id` UUID estable, `parcelaId` UUID, `fechaCosecha` YYYY-MM-DD, `variedad` TYPICA/GEISHA/BOURBON/CATIMOR, `tipoRecoleccion` SELECTIVA/GENERAL, `pesoKg` >0 con hasta tres decimales y ocho enteros. La fecha no puede ser futura. Un reintento idéntico devuelve 201 sin duplicar lote/evento; el mismo UUID con otro contenido devuelve 409.
 
-Calidad: `defectosPrimarios`, `defectosSecundarios` enteros no negativos y `puntajeSca` 0..100. El servidor asigna el UUID. No es idempotente; no reintentar automáticamente tras una respuesta incierta. No es la ficha sensorial completa.
+**HU08.** El cliente genera un UUID para cada nueva ficha y lo conserva durante el reintento. El servidor toma el catador de la sesión y asigna la fecha. El cuerpo de ejemplo es
+
+```json
+{
+  "id": "22987e8f-ed86-4fd7-9fd1-1410d930fab8",
+  "defectosPrimarios": 0,
+  "defectosSecundarios": 2,
+  "atributos": {
+    "fragancia": 8, "sabor": 8.5, "acidez": 8, "cuerpo": 8.5,
+    "posgusto": 8, "balance": 8, "uniformidad": 10, "dulzor": 10
+  },
+  "puntajeSca": 85
+}
+```
+
+Los defectos son enteros no negativos, los ocho atributos son obligatorios (0 a 10) y el puntaje manual admite de 0 a 100. El puntaje y los atributos admiten hasta dos decimales. La respuesta 201 y el historial incluyen identidad, fecha, clasificación y atributos. Un envío idéntico con el mismo UUID y catador devuelve la ficha original. Si cambia el contenido o el catador, devuelve 409. Cada nueva muestra usa otro UUID. Las evaluaciones básicas anteriores se leen con atributos y catador nulos.
 
 Riesgo: `humedad` 0..100 (relativa ambiental, no del grano), `horasDemora` >=0. Respuesta: `id,loteId,humedad,horasDemora,probabilidad:{valor},modelo,simulada`. Solo si `probabilidad.valor>0.70` se guarda una alerta. Cada solicitud crea una evaluación; no tiene clave idempotente.
 

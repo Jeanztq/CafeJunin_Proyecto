@@ -63,4 +63,32 @@ class SecurityTest {
                 .content("{\"humedad\":80,\"horasDemora\":5}"))
         .andExpect(status().isForbidden());
   }
+
+  @Test
+  void fichaUsaElCatadorDelToken() throws Exception {
+    var lote = java.util.UUID.randomUUID();
+    String cosecha = """
+        {"id":"%s","parcelaId":"22222222-2222-2222-2222-222222222222","fechaCosecha":"2025-01-01",
+         "variedad":"BOURBON","tipoRecoleccion":"SELECTIVA","pesoKg":120.5}
+        """.formatted(lote);
+    var productor = jwt().jwt(j -> j.subject("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"))
+        .authorities(new SimpleGrantedAuthority("ROLE_PRODUCTOR"));
+    var json = org.springframework.http.MediaType.APPLICATION_JSON;
+    mvc.perform(post("/api/lotes").with(productor).contentType(json).content(cosecha))
+        .andExpect(status().isCreated());
+    String ficha = """
+        {"id":"%s","defectosPrimarios":0,"defectosSecundarios":2,"puntajeSca":80,
+         "atributos":{"fragancia":8,"sabor":8,"acidez":8,"cuerpo":8,"posgusto":8,
+                      "balance":8,"uniformidad":10,"dulzor":10}}
+        """.formatted(java.util.UUID.randomUUID());
+    var ruta = "/api/lotes/" + lote + "/evaluaciones";
+    mvc.perform(post(ruta).with(productor).contentType(json).content(ficha))
+        .andExpect(status().isForbidden());
+    var catador = jwt().jwt(j -> j.subject("q1").claim("preferred_username", "Ana"))
+        .authorities(new SimpleGrantedAuthority("ROLE_CATADOR"));
+    mvc.perform(post(ruta).with(catador).contentType(json).content(ficha))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.catadorId").value("q1"))
+        .andExpect(jsonPath("$.catadorNombre").value("Ana"));
+  }
 }

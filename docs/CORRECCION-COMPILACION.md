@@ -30,7 +30,7 @@ git status
 
 Comprueba que node muestre v24.x. En GitHub Desktop revisa los cambios, crea un commit y pulsa Push origin. El nuevo push volverá a ejecutar Actions; no basta Re-run sobre el commit antiguo, porque conserva el código incompatible.
 
-Si solo quieres abrir la demo ya compilada, INICIAR-DEMO.cmd requiere Java17; Maven/Node se necesitan para reconstruir el proyecto.
+Si solo quieres abrir el portal compilado, INICIAR-CAFE-JUNIN.cmd requiere Java17; Maven/Node se necesitan para reconstruir el proyecto.
 
 ## Verificación y límites
 

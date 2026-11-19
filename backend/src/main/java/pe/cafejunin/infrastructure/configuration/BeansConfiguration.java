@@ -2,13 +2,6 @@ package pe.cafejunin.infrastructure.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
-import java.time.LocalDate;
-import java.math.BigDecimal;
-import java.util.UUID;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import pe.cafejunin.domain.builder.LoteBuilder;
-import pe.cafejunin.domain.entities.Lote;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,16 +29,9 @@ public class BeansConfiguration {
   }
 
   @Bean
-  @Profile("memory")
-  @ConditionalOnProperty(name = "app.demo.lote", havingValue = "true")
-  ApplicationRunner prepararLoteDemo(RegistrarCosechaUseCase cosecha, Clock reloj) {
-    return args -> cosecha.ejecutar(new LoteBuilder()
-        .identificado(UUID.fromString("cafe2401-0000-4000-8000-000000000001"))
-        .deParcela(MemoryStore.PARCELA_DEMO)
-        .cosechado(LocalDate.now(reloj).minusDays(1))
-        .variedad(Lote.Variedad.BOURBON)
-        .recoleccion(Lote.TipoRecoleccion.SELECTIVA)
-        .peso(new BigDecimal("120.500")).build());
+  @Profile("local")
+  LocalJdbcStore almacenamientoLocal(JdbcTemplate jdbc, PlatformTransactionManager tm) {
+    return new LocalJdbcStore(jdbc, new TransactionTemplate(tm));
   }
 
   @Bean
@@ -80,8 +66,8 @@ public class BeansConfiguration {
       CalidadRepositoryPort q,
       org.springframework.context.ApplicationEventPublisher publicador,
       UnidadTrabajoPort t,
-      Clock c) {
-    return new RegistrarCalidadService(l, q, publicador::publishEvent, t, c);
+      Clock c, @Value("${app.calidad.umbral-especialidad}") double umbral) {
+    return new RegistrarCalidadService(l, q, publicador::publishEvent, t, c, umbral);
   }
 
   @Bean
@@ -103,6 +89,7 @@ public class BeansConfiguration {
 
   @Bean
   PortalUseCase portal(
+      HistorialLotePort historial,
       CuentaActualPort a,
       LoteRepositoryPort l,
       CalidadRepositoryPort c,
@@ -111,6 +98,6 @@ public class BeansConfiguration {
       RegistrarCalidadUseCase ca,
       EvaluarRiesgoUseCase ri,
       RevisarAlertaUseCase re) {
-    return new PortalFacade(a, l, c, r, co, ca, ri, re);
+    return new PortalFacade(a, historial, l, c, r, co, ca, ri, re);
   }
 }

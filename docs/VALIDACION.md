@@ -1,11 +1,12 @@
 # Validación de la entrega 0.2
 
-## Verificación del incremento HU08
+## Registro de calidad y persistencia local
 
-- Java y Spring Boot. La suite ejecutó 20 pruebas con éxito. Incluye rechazo de datos incompletos, autorización, umbrales de 79.5 y 80, idempotencia y una sola entrada de evento por ficha. La prueba JDBC optativa requiere configurar una conexión.
-- React. Pasaron seis pruebas, incluidas corrección de campos, reintento tras un fallo de red y cancelación.
-- Navegador. Edge recorrió el JAR en memoria desde el lote de ejemplo hasta la confirmación y la consulta tras recargar. Se comprobó que el formulario cabe a 390 px de ancho.
-- SQL Express. En una base temporal se aplicaron los scripts dos veces, se consultó una evaluación histórica y se verificó que la cabecera, los atributos y el evento se pueden confirmar o revertir en una transacción.
+- Java y Spring Boot. La suite verifica restricciones sensoriales, cómputo en el servidor, rechazo del puntaje manual, autorización por rol, umbral configurable, reintentos y reversión si falla el consumidor. Incluye reapertura de H2 en archivo. Se ejecutaron 21 pruebas con éxito. La prueba JDBC optativa para SQL Server requiere las credenciales del despliegue.
+- React. Se ejecutaron seis pruebas, incluidas previsualización del puntaje, corrección de valores, reintento con el mismo identificador y cancelación.
+- SQL Express. Los procedimientos y la actualización del esquema se probaron en una base temporal. Se verificaron las columnas de la cata clásica, el registro del evento y el rollback conjunto.
+- Edge y JAR local. Desde una base nueva se registraron cosecha y cata, se corrigió una nota inválida y se obtuvo 85 sobre 100. Tras registrar riesgo y revisar su alerta se terminó el proceso y se inició otro con la misma base. El detalle recuperó las diez notas, el puntaje y los cinco movimientos. La ficha también se comprobó a 390 px de ancho.
+- Integración HTTP. Se ejecutó el recorrido del JAR con FastAPI y el modelo XGBoost incluido. Se verificaron el reintento de cosecha, la revisión de alertas y la respuesta ante la caída del predictor.
 
 ## Evidencia histórica anterior al incremento HU08
 

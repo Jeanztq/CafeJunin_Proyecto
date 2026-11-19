@@ -50,3 +50,22 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID('dbo.evaluaciones_calidad') AND name='ix_calidad_lote')
  CREATE INDEX ix_calidad_lote ON dbo.evaluaciones_calidad(lote_id,registrado_en,id);
 GO
+
+-- Los campos nulos identifican fichas históricas cuyo puntaje ingresó el catador.
+IF COL_LENGTH('dbo.fichas_cata', 'protocolo') IS NULL
+ ALTER TABLE dbo.fichas_cata ADD protocolo varchar(32), umbral_especialidad decimal(5,2),
+   taza_limpia float, apreciacion_global float, tazas_leves int, tazas_graves int;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID('dbo.outbox_eventos') AND name='ix_eventos_lote')
+ CREATE INDEX ix_eventos_lote ON dbo.outbox_eventos(agregado_id,ocurrido_en);
+GO
+IF OBJECT_ID('dbo.ck_fichas_cata_clasica', 'C') IS NULL
+ ALTER TABLE dbo.fichas_cata ADD CONSTRAINT ck_fichas_cata_clasica CHECK (
+   (protocolo IS NULL AND taza_limpia IS NULL AND apreciacion_global IS NULL
+    AND tazas_leves IS NULL AND tazas_graves IS NULL AND umbral_especialidad IS NULL)
+   OR (protocolo IS NOT NULL AND protocolo='SCA-2004' AND taza_limpia IS NOT NULL AND taza_limpia IN (0,2,4,6,8,10)
+    AND apreciacion_global IS NOT NULL AND apreciacion_global BETWEEN 6 AND 10
+    AND tazas_leves IS NOT NULL AND tazas_graves IS NOT NULL AND tazas_leves BETWEEN 0 AND 5 AND tazas_graves BETWEEN 0 AND 5
+    AND tazas_graves+tazas_leves<=5 AND umbral_especialidad IS NOT NULL AND umbral_especialidad BETWEEN 0 AND 100)
+ );
+GO

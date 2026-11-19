@@ -8,9 +8,31 @@ const atributos = [
   ["cuerpo", "Cuerpo"],
   ["posgusto", "Posgusto"],
   ["balance", "Balance"],
+  ["apreciacionGlobal", "Apreciación global"],
   ["uniformidad", "Uniformidad"],
+  ["tazaLimpia", "Taza limpia"],
   ["dulzor", "Dulzor"],
 ];
+const porTaza = new Set(["uniformidad", "dulzor", "tazaLimpia"]);
+
+function puntajePrevio(form) {
+  let subtotal = 0;
+  for (const [key] of atributos) {
+    const campo = form.elements.namedItem(key);
+    if (!campo.validity.valid) return null;
+    subtotal += Number(campo.value);
+  }
+  const leves = form.elements.leves,
+    graves = form.elements.graves;
+  if (
+    !leves.validity.valid ||
+    !graves.validity.valid ||
+    Number(leves.value) + Number(graves.value) > 5
+  )
+    return null;
+  return subtotal - 2 * Number(leves.value) - 4 * Number(graves.value);
+}
+
 const puntos = (valor) =>
   Number(valor).toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -38,6 +60,22 @@ export function ResultadoCalidad({ ficha }) {
         </dd>
         <dt>Clasificación por puntaje</dt>
         <dd>{ficha.clasificacion}</dd>
+        <dt>Método</dt>
+        <dd>
+          {ficha.protocolo === "SCA-2004"
+            ? "SCA clásica (2004)"
+            : "Registro histórico · puntaje manual"}
+        </dd>
+        {ficha.defectosTaza && (
+          <>
+            <dt>Tazas con defecto leve / grave</dt>
+            <dd>
+              {ficha.defectosTaza.leves} / {ficha.defectosTaza.graves}
+            </dd>
+            <dt>Umbral comercial aplicado</dt>
+            <dd>{puntos(ficha.umbralEspecialidad)} puntos</dd>
+          </>
+        )}
         <dt>Estado</dt>
         <dd>{ficha.atributos ? "Confirmada" : "Registro básico anterior"}</dd>
       </dl>
@@ -45,12 +83,14 @@ export function ResultadoCalidad({ ficha }) {
         <details>
           <summary>Ver atributos sensoriales</summary>
           <dl>
-            {atributos.map(([key, label]) => (
-              <React.Fragment key={key}>
-                <dt>{label}</dt>
-                <dd>{puntos(ficha.atributos[key])} / 10</dd>
-              </React.Fragment>
-            ))}
+            {atributos
+              .filter(([key]) => ficha.atributos[key] != null)
+              .map(([key, label]) => (
+                <React.Fragment key={key}>
+                  <dt>{label}</dt>
+                  <dd>{puntos(ficha.atributos[key])} / 10</dd>
+                </React.Fragment>
+              ))}
           </dl>
         </details>
       )}
@@ -67,7 +107,7 @@ function Campo({ label, children }) {
   );
 }
 
-function Numero({ name, label, max, entero = false, invalido }) {
+function Numero({ name, label, max, min = 0, step = 1, initial, invalido }) {
   return (
     <Campo label={label}>
       <input
@@ -75,22 +115,29 @@ function Numero({ name, label, max, entero = false, invalido }) {
         aria-invalid={invalido || undefined}
         aria-describedby={invalido ? "aviso-cata" : undefined}
         type="number"
-        min="0"
+        min={min}
         max={max}
-        step={entero ? "1" : "0.01"}
+        step={step}
+        defaultValue={initial}
         required
       />
     </Campo>
   );
 }
 
-export default function Calidad({ lotes, parcelas, cancelar }) {
+export default function Calidad({
+  lotes,
+  parcelas,
+  cancelar,
+  registrarCosecha,
+}) {
   const [loteId, setLoteId] = useState(lotes[0]?.id || "");
   const [ficha, setFicha] = useState(null);
   const [error, setError] = useState("");
   const [campoInvalido, setCampoInvalido] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [operacionId, setOperacionId] = useState(() => crypto.randomUUID());
+  const [previo, setPrevio] = useState(null);
   const enviando = useRef(false);
   const lote = lotes.find((item) => item.id === loteId);
   const parcela = parcelas.find((item) => item.id === lote?.parcelaId);
@@ -106,15 +153,29 @@ export default function Calidad({ lotes, parcelas, cancelar }) {
       const nombre = invalido.labels?.[0]?.textContent || "Campo";
       const mensaje = invalido.validity.valueMissing
         ? "Completa este campo."
-        : invalido.name.startsWith("defectos")
-          ? "Usa un entero no negativo."
-          : `Usa un valor entre 0 y ${invalido.max} con hasta dos decimales.`;
+        : ["leves", "graves"].includes(invalido.name)
+          ? "Ingresa un número entero de 0 a 5."
+          : invalido.name.startsWith("defectos")
+            ? "Usa un entero no negativo."
+            : `Usa un valor de ${invalido.min} a ${invalido.max}, en pasos de ${invalido.step}.`;
       setError(`${nombre.trim()}. ${mensaje}`);
       setCampoInvalido(invalido.name);
       invalido.focus();
       return;
     }
     const campos = new FormData(form);
+    const defectosTaza = {
+      leves: Number(campos.get("leves")),
+      graves: Number(campos.get("graves")),
+    };
+    if (defectosTaza.leves + defectosTaza.graves > 5) {
+      setError(
+        "El total de tazas afectadas supera las cinco tazas de la muestra.",
+      );
+      setCampoInvalido("graves");
+      form.elements.graves.focus();
+      return;
+    }
     enviando.current = true;
     setGuardando(true);
     setCampoInvalido("");
@@ -130,7 +191,7 @@ export default function Calidad({ lotes, parcelas, cancelar }) {
             atributos: Object.fromEntries(
               atributos.map(([key]) => [key, Number(campos.get(key))]),
             ),
-            puntajeSca: Number(campos.get("puntajeSca")),
+            defectosTaza,
           }),
         }),
       );
@@ -144,7 +205,7 @@ export default function Calidad({ lotes, parcelas, cancelar }) {
 
   return (
     <div className="calidad">
-      <p className="modulo">Calidad · HU08</p>
+      <p className="modulo">Ficha de cata · SCA clásica (2004)</p>
       <h1>Evaluar la calidad del lote</h1>
       {lote && (
         <p className="contexto-lote">
@@ -156,9 +217,13 @@ export default function Calidad({ lotes, parcelas, cancelar }) {
         <section>
           <h2>Sin lotes para evaluar</h2>
           <p>La ficha se habilita cuando se registra una cosecha.</p>
-          <button className="secondary" onClick={cancelar}>
-            Volver a lotes
-          </button>
+          {registrarCosecha ? (
+            <button onClick={registrarCosecha}>Registrar cosecha</button>
+          ) : (
+            <button className="secondary" onClick={cancelar}>
+              Volver a lotes
+            </button>
+          )}
         </section>
       ) : ficha ? (
         <>
@@ -171,6 +236,7 @@ export default function Calidad({ lotes, parcelas, cancelar }) {
             <button
               onClick={() => {
                 setFicha(null);
+                setPrevio(null);
                 setOperacionId(crypto.randomUUID());
               }}
             >
@@ -191,6 +257,7 @@ export default function Calidad({ lotes, parcelas, cancelar }) {
                 onSubmit={guardar}
                 noValidate
                 onChange={(event) => {
+                  setPrevio(puntajePrevio(event.currentTarget));
                   if (
                     campoInvalido === event.target.name &&
                     event.target.validity.valid
@@ -221,18 +288,21 @@ export default function Calidad({ lotes, parcelas, cancelar }) {
                       label="Defectos primarios"
                       name="defectosPrimarios"
                       invalido={campoInvalido === "defectosPrimarios"}
-                      entero
                       max={2147483647}
                     />
                     <Numero
                       label="Defectos secundarios"
                       name="defectosSecundarios"
                       invalido={campoInvalido === "defectosSecundarios"}
-                      entero
                       max={2147483647}
                     />
                   </div>
-                  <h3>Atributos sensoriales · escala de 0 a 10</h3>
+                  <h3>Perfil sensorial</h3>
+                  <p className="cata-nota">
+                    Califica siete atributos de 6 a 10 en pasos de 0.25. Para
+                    uniformidad, dulzor y taza limpia asigna 2 puntos por cada
+                    taza que cumple, hasta 10.
+                  </p>
                   <div className="cata-pares">
                     {atributos.map(([key, label]) => (
                       <Numero
@@ -240,16 +310,42 @@ export default function Calidad({ lotes, parcelas, cancelar }) {
                         name={key}
                         invalido={campoInvalido === key}
                         label={label}
+                        min={porTaza.has(key) ? 0 : 6}
+                        step={porTaza.has(key) ? 2 : 0.25}
                         max={10}
                       />
                     ))}
                   </div>
-                  <Numero
-                    label="Puntaje SCA final"
-                    name="puntajeSca"
-                    invalido={campoInvalido === "puntajeSca"}
-                    max={100}
-                  />
+                  <h3>Defectos en taza</h3>
+                  <p className="cata-nota">
+                    Cuenta cada taza una sola vez según el defecto de mayor
+                    intensidad.
+                  </p>
+                  <div className="cata-pares">
+                    <Numero
+                      name="leves"
+                      label="Tazas con defecto leve"
+                      max={5}
+                      initial={0}
+                      invalido={campoInvalido === "leves"}
+                    />
+                    <Numero
+                      name="graves"
+                      label="Tazas con defecto grave"
+                      max={5}
+                      initial={0}
+                      invalido={campoInvalido === "graves"}
+                    />
+                  </div>
+                  <div className="cata-total">
+                    <span>Puntaje final calculado</span>
+                    <output
+                      aria-label="Puntaje final calculado"
+                      aria-live="polite"
+                    >
+                      {previo == null ? "Pendiente" : puntos(previo) + " / 100"}
+                    </output>
+                  </div>
                   <div className="cata-pares acciones">
                     <button type="submit">
                       {guardando ? "Registrando…" : "Registrar evaluación"}
@@ -273,8 +369,8 @@ export default function Calidad({ lotes, parcelas, cancelar }) {
                 <li>Confirma el puntaje final.</li>
               </ol>
               <p>
-                Registra el puntaje de la muestra catada. La evaluación se
-                guarda al confirmar.
+                El sistema suma los diez atributos y descuenta 2 puntos por taza
+                con defecto leve y 4 por defecto grave.
               </p>
             </section>
           </div>

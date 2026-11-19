@@ -14,7 +14,7 @@ public final class PredictorFactory {
   public static PrediccionRiesgoPort crear(
       String modo, String url, String apiKey, ObjectMapper json) {
     return switch (modo) {
-      case "rules" -> new SimuladorRiesgoAdapter();
+      case "rules" -> new RiesgoPorReglasAdapter();
       case "xgboost" ->
           new HttpXgboostAdapter(
               HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build(),

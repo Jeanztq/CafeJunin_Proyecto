@@ -10,6 +10,7 @@ import pe.cafejunin.domain.entities.*;
 // casos de uso.
 public final class PortalFacade implements PortalUseCase {
   private final CuentaActualPort identidad;
+  private final HistorialLotePort historial;
   private final LoteRepositoryPort lotes;
   private final CalidadRepositoryPort evaluaciones;
   private final RiesgoRepositoryPort riesgos;
@@ -20,6 +21,7 @@ public final class PortalFacade implements PortalUseCase {
 
   public PortalFacade(
       CuentaActualPort identidad,
+      HistorialLotePort historial,
       LoteRepositoryPort lotes,
       CalidadRepositoryPort evaluaciones,
       RiesgoRepositoryPort riesgos,
@@ -28,6 +30,7 @@ public final class PortalFacade implements PortalUseCase {
       EvaluarRiesgoUseCase riesgo,
       RevisarAlertaUseCase revision) {
     this.identidad = identidad;
+    this.historial = historial;
     this.lotes = lotes;
     this.evaluaciones = evaluaciones;
     this.riesgos = riesgos;
@@ -82,13 +85,17 @@ public final class PortalFacade implements PortalUseCase {
 
   public Detalle detalle(UUID id) {
     var lote = autorizado(id);
+    boolean supervisor = cuenta().tiene("SUPERVISOR");
+    var hitos = historial.historialDe(id).stream()
+        .filter(h -> supervisor || h.tipo().equals("CosechaRegistrada")
+            || h.tipo().equals("EvaluacionCalidadRegistrada")).toList();
     return new Detalle(
         lote,
         evaluaciones.calidadDe(id),
-        cuenta().tiene("SUPERVISOR") ? riesgos.riesgosDe(id) : List.of(),
-        cuenta().tiene("SUPERVISOR")
+        supervisor ? riesgos.riesgosDe(id) : List.of(),
+        supervisor
             ? riesgos.listarAlertas().stream().filter(registro -> registro.loteId().equals(id)).toList()
-            : List.of());
+            : List.of(), hitos);
   }
 
   public Lote cosecha(Lote lote) {

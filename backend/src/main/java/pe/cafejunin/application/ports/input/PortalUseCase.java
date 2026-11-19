@@ -8,7 +8,8 @@ public interface PortalUseCase {
       Lote lote,
       List<EvaluacionCalidad> calidad,
       List<EvaluacionRiesgo> riesgos,
-      List<Alerta> alertas) {}
+      List<Alerta> alertas,
+      List<pe.cafejunin.application.ports.output.HistorialLotePort.Hito> historial) {}
 
   Cuenta cuenta();
 

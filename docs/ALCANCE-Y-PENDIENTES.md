@@ -6,7 +6,7 @@ La entrega final se centra en HU08. La tabla distingue su implementación de las
 |---|---|---|
 | Hexagonal y patrones solicitados | Código implementado y pruebas del núcleo | Revisión académica con rúbrica del docente |
 | Cosecha / HU05 | Web/API, validación, ownership, idempotencia | Captura móvil autenticada y sincronización |
-| Calidad / HU08 | Ficha física y sensorial, identidad de catador, clasificación, historial y reintento idempotente | Validación académica con el docente |
+| Calidad / HU08 | Ficha clásica SCA de diez atributos, puntaje calculado, método, umbral comercial y responsable persistidos | Validación académica con el docente |
 | Datos IA / HU15 | Captura manual de dos variables | Sensores, fuentes oficiales, calidad de datos y definición de etiqueta |
 | Predicción / HU16 | XGBoost integrado por HTTP; entrenamiento sintético | Dataset real, validación por finca/tiempo, calibración y eficacia |
 | Alertas / HU17 | Umbral estricto >70%, lista persistida, evento | Notificación inmediata y automatización por telemetría |
@@ -15,7 +15,7 @@ La entrega final se centra en HU08. La tabla distingue su implementación de las
 | SQL Server | Esquema y procedimientos HU08 probados en SQL Express | Verificar el adaptador JDBC con credenciales del despliegue, backups y permisos mínimos |
 | Identidad | Cliente OIDC PKCE, JWT issuer/audiencia, realm y TOTP requeridos | Verificar login/logout/MFA con Keycloak real |
 | Flutter | Código de borradores SQLite offline | SDK, compilación, pruebas físicas, OIDC, cifrado, ACK, sincronización/conflictos |
-| Eventos | Consumidor local HU08 y outbox atómico con referencia a la ficha | Publicación a un broker externo |
+| Eventos | Consumidor local HU08, outbox atómico y línea de tiempo del lote por rol | Publicación a un broker externo |
 | GitHub | Scripts Git y workflow CI | Elegir repositorio y realizar push |
 | Transporte y procesamiento | Pendiente | Asignaciones, recepción, consolidación, evidencias y telemetría |
 | Consumidor | Pendiente | QR firmado y trazabilidad pública sin datos privados |

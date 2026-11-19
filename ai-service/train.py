@@ -1,4 +1,4 @@
-"""Entrenamiento reproducible. --demo utiliza una regla inventada, no evidencia agronómica."""
+"""Entrenamiento reproducible. --synthetic utiliza una regla inventada, no evidencia agronómica."""
 import argparse, hashlib, json
 from pathlib import Path
 import numpy as np
@@ -30,10 +30,10 @@ def train(destination, csv=None):
     out=Path(destination);out.mkdir(parents=True,exist_ok=True)
     model.save_model(out/'risk.json')
     probability=model.predict_proba(test_x)[:,1]
-    card={'id':'xgboost-demo-v1' if not csv else 'xgboost-candidato-v1','datasetType':kind,'validated':False,'xgboostVersion':xgb.__version__,'features':{'humedad':'Humedad relativa AMBIENTAL (%)','horasDemora':'Demora observada desde cosecha (horas)'},'rows':len(frame),'split':'75/25 aleatorio estratificado; sustituir por validación temporal y por finca para producción','metrics':{'auc':float(roc_auc_score(test_y,probability)),'brier':float(brier_score_loss(test_y,probability))},'sha256':hashlib.sha256((out/'risk.json').read_bytes()).hexdigest(),'limitations':'Datos sintéticos o candidato no validado. No demuestra eficacia agronómica. Sin validación independiente, calibración ni seguimiento de deriva. No usar para decisiones reales.'}
+    card={'id':'xgboost-sintetico-v1' if not csv else 'xgboost-candidato-v1','datasetType':kind,'validated':False,'xgboostVersion':xgb.__version__,'features':{'humedad':'Humedad relativa AMBIENTAL (%)','horasDemora':'Demora observada desde cosecha (horas)'},'rows':len(frame),'split':'75/25 aleatorio estratificado; sustituir por validación temporal y por finca para producción','metrics':{'auc':float(roc_auc_score(test_y,probability)),'brier':float(brier_score_loss(test_y,probability))},'sha256':hashlib.sha256((out/'risk.json').read_bytes()).hexdigest(),'limitations':'Datos sintéticos o candidato no validado. No demuestra eficacia agronómica. Sin validación independiente, calibración ni seguimiento de deriva. No usar para decisiones reales.'}
     (out/'model-card.json').write_text(json.dumps(card,indent=2,ensure_ascii=False))
     return card
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--demo',action='store_true');parser.add_argument('--csv');parser.add_argument('--output',default='model');args=parser.parse_args()
-    if bool(args.demo)==bool(args.csv):parser.error('Selecciona --demo o --csv ruta.csv')
+    parser=argparse.ArgumentParser();parser.add_argument('--synthetic',action='store_true');parser.add_argument('--csv');parser.add_argument('--output',default='model');args=parser.parse_args()
+    if bool(args.synthetic)==bool(args.csv):parser.error('Selecciona --synthetic o --csv ruta.csv')
     print(json.dumps(train(args.output,args.csv),indent=2,ensure_ascii=False))

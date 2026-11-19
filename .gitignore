@@ -12,3 +12,5 @@ mobile/android/local.properties
 *.log
 *.jks
 *.keystore
+
+/state/

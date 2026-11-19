@@ -9,7 +9,7 @@ Convención: GIVEN–WHEN–THEN (Dado–Cuando–Entonces).
 | Cosecha | Parcela propia y campos válidos | Guarda | Lote y evento atómicos |
 | Reintento cosecha | UUID ya registrado con idénticos datos | Reenvía | Un solo lote y evento |
 | Conflicto cosecha | UUID existente con otro peso | Reenvía | 409 sin sobrescribir |
-| HU08 · CA01 | Catador y lote existente | Confirma defectos, ocho atributos y puntaje | Ficha, catador, fecha y evento dentro de la misma transacción |
+| HU08 · CA01 | Catador y lote existente | Confirma defectos, diez atributos y defectos de taza | Ficha, catador, fecha y evento dentro de la misma transacción |
 | HU08 · CA02 | Ficha registrada | Abre el detalle del lote | Puede consultar todos los atributos, defectos, puntaje y clasificación |
 | HU08 · CA03 | Ficha incompleta o fuera de escala | Intenta registrar | Puede corregir los campos sin guardar una evaluación |
 | HU08 · Reintento | Ficha ya confirmada | Repite el mismo envío | Devuelve la ficha original y conserva un único evento |

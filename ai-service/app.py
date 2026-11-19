@@ -27,5 +27,5 @@ def health():return {'status':'UP','modelo':app.state.card['id'],'validado':app.
 def predict(body:Inputs,x_api_key:str=Header(default='')):
     if not hmac.compare_digest(x_api_key,app.state.key):raise HTTPException(401,'Credencial inválida')
     probability=float(app.state.model.predict_proba(np.array([[body.humedad,body.horasDemora]]))[0,1])
-    # Cualquier modelo candidato sigue identificado como demostración hasta validación independiente.
+    # Cualquier modelo candidato sigue identificado como no validado hasta validación independiente.
     return {'probabilidad':probability,'modelo':app.state.card['id'],'simulada':not app.state.card['validated']}

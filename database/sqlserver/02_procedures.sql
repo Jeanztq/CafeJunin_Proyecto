@@ -12,15 +12,17 @@ CREATE OR ALTER PROCEDURE dbo.sp_registrar_calidad
  @id uniqueidentifier, @lote uniqueidentifier, @p int, @s int, @puntaje float,
  @catador nvarchar(255), @nombre nvarchar(255), @fecha datetime2,
  @fragancia float, @sabor float, @acidez float, @cuerpo float,
- @posgusto float, @balance float, @uniformidad float, @dulzor float
+ @posgusto float, @balance float, @uniformidad float, @dulzor float,
+ @taza_limpia float, @apreciacion_global float, @leves int, @graves int,
+ @protocolo varchar(32), @umbral decimal(5,2)
 AS BEGIN
  SET NOCOUNT ON;
  SET XACT_ABORT ON;
  BEGIN TRANSACTION;
  INSERT dbo.evaluaciones_calidad(id,lote_id,defectos_primarios,defectos_secundarios,puntaje_sca,registrado_en)
  VALUES(@id,@lote,@p,@s,@puntaje,@fecha);
- INSERT dbo.fichas_cata(evaluacion_id,catador_id,catador_nombre,fragancia,sabor,acidez,cuerpo,posgusto,balance,uniformidad,dulzor)
- VALUES(@id,@catador,@nombre,@fragancia,@sabor,@acidez,@cuerpo,@posgusto,@balance,@uniformidad,@dulzor);
+ INSERT dbo.fichas_cata(evaluacion_id,catador_id,catador_nombre,fragancia,sabor,acidez,cuerpo,posgusto,balance,uniformidad,dulzor,taza_limpia,apreciacion_global,tazas_leves,tazas_graves,protocolo,umbral_especialidad)
+ VALUES(@id,@catador,@nombre,@fragancia,@sabor,@acidez,@cuerpo,@posgusto,@balance,@uniformidad,@dulzor,@taza_limpia,@apreciacion_global,@leves,@graves,@protocolo,@umbral);
  COMMIT;
 END;
 GO

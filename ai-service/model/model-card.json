@@ -1,5 +1,5 @@
 {
-  "id": "xgboost-demo-v1",
+  "id": "xgboost-sintetico-v1",
   "datasetType": "SYNTHETIC",
   "validated": false,
   "xgboostVersion": "3.4.1",

@@ -12,8 +12,9 @@ public final class MemoryStore
         CalidadRepositoryPort,
         RiesgoRepositoryPort,
         EventoRepositoryPort,
+        HistorialLotePort,
         UnidadTrabajoPort {
-  public static final UUID PARCELA_DEMO = UUID.fromString("11111111-1111-1111-1111-111111111111");
+  public static final UUID PARCELA_MIRADOR = UUID.fromString("11111111-1111-1111-1111-111111111111");
   private Map<UUID, Lote> lotes = new LinkedHashMap<>();
   private Map<UUID, EvaluacionCalidad> calidad = new LinkedHashMap<>();
   private Map<UUID, EvaluacionRiesgo> riesgos = new LinkedHashMap<>();
@@ -30,10 +31,10 @@ public final class MemoryStore
 
   public synchronized List<Parcela> listarParcelas() {
     return List.of(
-        new Parcela(PARCELA_DEMO, "El Mirador · Demo local", "Satipo, Junín", "demo"),
+        new Parcela(PARCELA_MIRADOR, "El Mirador", "Satipo, Junín", "operador-local"),
         new Parcela(
             UUID.fromString("22222222-2222-2222-2222-222222222222"),
-            "El Mirador · Productor de prueba",
+            "La Esperanza",
             "Satipo, Junín",
             "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"));
   }
@@ -97,6 +98,12 @@ public final class MemoryStore
 
   public synchronized List<EventoDominio> eventosPendientes() {
     return List.copyOf(eventos);
+  }
+
+  public synchronized List<Hito> historialDe(UUID loteId) {
+    return eventos.stream().filter(e -> e.agregadoId().equals(loteId))
+        .map(e -> new Hito(e.id(), e.tipo(), e.ocurridoEn()))
+        .sorted(Comparator.comparing(Hito::ocurridoEn)).toList();
   }
 
   public synchronized <T> T ejecutar(Supplier<T> accion) {

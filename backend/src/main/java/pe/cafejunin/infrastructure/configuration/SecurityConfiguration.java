@@ -17,8 +17,7 @@ public class SecurityConfiguration {
       name = "app.security.enabled",
       havingValue = "false",
       matchIfMissing = true)
-  SecurityFilterChain demo(HttpSecurity http) throws Exception {
-    // Demo local sin autenticación. No contiene inicio de sesión ni selección de privilegios.
+  SecurityFilterChain sesionLocal(HttpSecurity http) throws Exception {
     return http.csrf(c -> c.disable())
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(a -> a.anyRequest().permitAll())

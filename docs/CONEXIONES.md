@@ -41,7 +41,7 @@ Realm `cafejunin`, cliente público `cafejunin-web`, autorización con PKCE S256
 
 Usuarios: `productor`, `catador`, `supervisor`, `transportista`. Contraseña inicial de laboratorio: `CafeJunin-Local-2026!`. Todos son ficticios. Cambia las contraseñas antes de compartir cualquier entorno. Catador y supervisor tienen requerida la configuración de TOTP; al primer acceso Keycloak pedirá registrar un autenticador. Este recorrido con Keycloak aún debe verificarse en tu PC.
 
-La parcela `22222222-2222-2222-2222-222222222222` pertenece al UUID del productor de prueba. La parcela `1111…` pertenece a la identidad de demo. Si creas otra cuenta, vincula `propietario_subject` de la parcela al `sub` real de esa cuenta; no al nombre de usuario. Catador y supervisor tienen acceso a los lotes del piloto de una sola cooperativa. Transporte todavía no tiene asignaciones implementadas. Consumidor no necesita una cuenta para el futuro QR público; ese flujo sigue pendiente.
+La parcela `22222222-2222-2222-2222-222222222222` pertenece al UUID del productor de prueba. La parcela `1111…` pertenece a la identidad operador-local. Si creas otra cuenta, vincula `propietario_subject` de la parcela al `sub` real de esa cuenta; no al nombre de usuario. Catador y supervisor tienen acceso a los lotes de una sola cooperativa. Transporte todavía no tiene asignaciones implementadas. Consumidor no necesita una cuenta para el futuro QR público; ese flujo sigue pendiente.
 
 La importación del realm solo crea un realm inexistente. Si ya tienes uno, revisa sus clientes/roles/usuarios; no borres el volumen sin respaldo. Las URLs autorizadas solo cubren localhost/127.0.0.1:8080 y 5173. Para otro dominio, actualiza redirects, web origins, issuer y TLS de forma consistente.
 
@@ -60,7 +60,7 @@ uvicorn app:app --host 127.0.0.1 --port 8001
 
 En el backend configura la misma clave y `PREDICTOR_MODE=xgboost`. La URL por defecto es http://127.0.0.1:8001/predict. No se guardan evaluaciones cuando el servicio falla: responde 503, sin sustituirlo silenciosamente por reglas.
 
-`python train.py --demo` reproduce el modelo sintético. `python train.py --csv ruta.csv` entrena un candidato con columnas `humedad,horasDemora,riesgo`. La etiqueta es un resultado binario observado y su definición debe acordarse con el especialista. El candidato continúa marcado como no validado: requiere revisar procedencia, separación temporal/por finca, calibración, cobertura, métricas y evaluación independiente antes de usarlo. No cambies `validated` para aparentar cumplimiento; además, la ficha fija el hash del modelo.
+`python train.py --synthetic` reproduce el modelo sintético. `python train.py --csv ruta.csv` entrena un candidato con columnas `humedad,horasDemora,riesgo`. La etiqueta es un resultado binario observado y su definición debe acordarse con el especialista. El candidato continúa marcado como no validado: requiere revisar procedencia, separación temporal/por finca, calibración, cobertura, métricas y evaluación independiente antes de usarlo. No cambies `validated` para aparentar cumplimiento; además, la ficha fija el hash del modelo.
 
 ## Verificar SQL Server
 

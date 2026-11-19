@@ -1,5 +1,3 @@
-# Ejecutable 0.2
+# Ejecutable del portal
 
-`java -jar cafejunin-backend-0.2.0.jar --spring.profiles.active=memory --app.demo.lote=true`
-
-Requiere JDK17. Incluye React compilado. Abre http://localhost:8080. Demo sin autenticación, memoria volátil y predictor de reglas por defecto. Para SQL Server/Keycloak/XGBoost consulta docs/CONEXIONES.md. Recompilar mediante scripts/Compilar.ps1 después de editar.
+Desde la raíz del proyecto ejecuta **INICIAR-CAFE-JUNIN.cmd** con Java 17 o posterior y abre http://localhost:8080. El JAR incluye el portal compilado y H2 para persistencia local. Los perfiles sqlserver y memory se seleccionan explícitamente.

@@ -42,10 +42,10 @@ class SqlServerIntegrationTest {
                   .peso(BigDecimal.TEN)
                   .build();
           new RegistrarCosechaService(store, store, store, clock).ejecutar(l);
-          var calidad = new RegistrarCalidadService(store, store, store::agregar, store, clock);
+          var calidad = new RegistrarCalidadService(store, store, store::agregar, store, clock, 80);
           var catador = new Cuenta("q1", "Ana", Set.of("CATADOR"), false);
-          var solicitud = new Solicitud(UUID.randomUUID(), id, 0, 1, 85,
-              new AtributosSensoriales(8d, 8.5, 8d, 8.5, 8d, 8d, 10d, 10d));
+          var solicitud = new Solicitud(UUID.randomUUID(), id, 0, 1, new pe.cafejunin.domain.valueobjects.DefectosTaza(1, 0),
+              new AtributosSensoriales(8d, 8.5, 8d, 8.5, 8d, 8d, 10d, 10d, 10d, 8d));
           var ficha = calidad.ejecutar(solicitud, catador);
           assertEquals(ficha, calidad.ejecutar(solicitud, catador));
           assertEquals(ficha, store.calidadDe(id).get(0));

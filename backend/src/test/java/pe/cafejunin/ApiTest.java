@@ -32,7 +32,7 @@ class ApiTest {
     mvc.perform(post("/api/lotes").contentType(MediaType.APPLICATION_JSON).content(body))
         .andExpect(status().isCreated());
     String ficha = """
-{"id":"%s","defectosPrimarios":0,"defectosSecundarios":2,"puntajeSca":85,"atributos":{"fragancia":8,"sabor":8.5,"acidez":8,"cuerpo":8.5,"posgusto":8,"balance":8,"uniformidad":10,"dulzor":10}}
+{"id":"%s","defectosPrimarios":0,"defectosSecundarios":2,"defectosTaza":{"leves":1,"graves":0},"atributos":{"fragancia":8,"sabor":8.5,"acidez":8,"cuerpo":8.5,"posgusto":8,"balance":8,"uniformidad":10,"dulzor":10,"tazaLimpia":10,"apreciacionGlobal":8}}
 """.formatted(UUID.randomUUID());
     mvc.perform(
             post("/api/lotes/" + id + "/evaluaciones")
@@ -41,10 +41,12 @@ class ApiTest {
         .andExpect(status().isCreated());
     var evaluaciones = "/api/lotes/" + id + "/evaluaciones";
     mvc.perform(post(evaluaciones).contentType(MediaType.APPLICATION_JSON).content(ficha))
-        .andExpect(status().isCreated()).andExpect(jsonPath("$.catadorId").value("demo"));
-    mvc.perform(post(evaluaciones).contentType(MediaType.APPLICATION_JSON).content(ficha.replace("85,", "80,")))
+        .andExpect(status().isCreated()).andExpect(jsonPath("$.catadorId").value("operador-local"));
+    mvc.perform(post(evaluaciones).contentType(MediaType.APPLICATION_JSON).content(ficha.replace("\"leves\":1", "\"leves\":0")))
         .andExpect(status().isConflict());
-    for (String invalida : new String[] {ficha.replace("85,", "105,"), ficha.replace("8.5", "12.5"),
+    for (String invalida : new String[] {ficha.replace("\"atributos\":", "\"puntajeSca\":100,\"atributos\":"),
+        ficha.replace("\"leves\":1", "\"leves\":6"), ficha.replace("\"tazaLimpia\":10,", ""),
+        ficha.replace("\"dulzor\":10", "\"dulzor\":9"), ficha.replace("8.5", "8.55"), ficha.replace("8.5", "12.5"),
         ficha.replace("\"dulzor\":10", "\"dulzor\":null"), ficha.replace("\"fragancia\":8,", ""),
         ficha.replace("\"defectosPrimarios\":0", "\"defectosPrimarios\":0.5")}) {
       mvc.perform(post(evaluaciones).contentType(MediaType.APPLICATION_JSON).content(invalida))
@@ -55,6 +57,9 @@ class ApiTest {
     org.junit.jupiter.api.Assertions.assertEquals(1, eventos.size());
     org.junit.jupiter.api.Assertions.assertEquals(2, eventos.get(0).version());
     mvc.perform(get("/api/lotes/" + id + "/detalle")).andExpect(jsonPath("$.calidad.length()").value(1))
+        .andExpect(jsonPath("$.calidad[0].puntajeSca").value(85))
+        .andExpect(jsonPath("$.historial.length()").value(2))
+        .andExpect(jsonPath("$.calidad[0].protocolo").value("SCA-2004"))
         .andExpect(jsonPath("$.calidad[0].atributos.sabor").value(8.5))
         .andExpect(jsonPath("$.calidad[0].clasificacion").value("Café especial"));
     mvc.perform(
@@ -79,7 +84,7 @@ class ApiTest {
   }
 
   @Test
-  void interfazDemoDisponible() throws Exception {
+  void portalDisponible() throws Exception {
     mvc.perform(get("/")).andExpect(status().isOk());
   }
 }

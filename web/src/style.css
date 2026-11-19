@@ -643,3 +643,22 @@ footer {
     margin-bottom: 12px;
   }
 }
+
+.cata-nota {
+  margin: 0 0 6px;
+  color: #62584e;
+  font-size: 14px;
+}
+.cata-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 6px;
+  background: #eaf0e9;
+}
+.cata-total output {
+  color: #28513d;
+  font-weight: 700;
+}

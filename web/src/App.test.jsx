@@ -18,7 +18,7 @@ function mock(role) {
   api.mockImplementation((path) =>
     Promise.resolve(
       path === "/me"
-        ? { nombre: "Ana", roles: [role], demostracion: true }
+        ? { nombre: "Ana", roles: [role], local: true }
         : [],
     ),
   );

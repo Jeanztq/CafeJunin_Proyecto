@@ -17,7 +17,7 @@ public final class CuentaSpringAdapter implements CuentaActualPort {
   public Cuenta actual() {
     if (!seguridad)
       return new Cuenta(
-          "demo", "Demostración local", Set.of("PRODUCTOR", "CATADOR", "SUPERVISOR"), true);
+          "operador-local", "Operador local", Set.of("PRODUCTOR", "CATADOR", "SUPERVISOR"), true);
     var auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) throw new ProhibidoException();
     Set<String> roles = new HashSet<>();

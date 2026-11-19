@@ -31,9 +31,9 @@ def main():
         assert request(base,'/api/lotes',body,'POST')[0]==201
         assert len(request(base,'/api/lotes')[1])==1
         report['checks'].append('Cosecha persistida; reintento no duplica')
-        assert request(base,f'/api/lotes/{lot}/evaluaciones',{"id":str(uuid.uuid4()),"defectosPrimarios":0,"defectosSecundarios":2,"puntajeSca":85,"atributos":{"fragancia":8,"sabor":8.5,"acidez":8,"cuerpo":8.5,"posgusto":8,"balance":8,"uniformidad":10,"dulzor":10}},'POST')[0]==201
+        assert request(base,f'/api/lotes/{lot}/evaluaciones',{"id":str(uuid.uuid4()),"defectosPrimarios":0,"defectosSecundarios":2,"defectosTaza":{"leves":1,"graves":0},"atributos":{"fragancia":8,"sabor":8.5,"acidez":8,"cuerpo":8.5,"posgusto":8,"balance":8,"uniformidad":10,"dulzor":10,"tazaLimpia":10,"apreciacionGlobal":8}},'POST')[0]==201
         status,risk=request(base,f'/api/lotes/{lot}/riesgos',{'humedad':95,'horasDemora':60},'POST')
-        assert status==201 and risk['simulada'] is True and risk['modelo']=='xgboost-demo-v1' and risk['probabilidad']['valor']>.7,risk
+        assert status==201 and risk['simulada'] is True and risk['modelo']=='xgboost-sintetico-v1' and risk['probabilidad']['valor']>.7,risk
         report['checks'].append('Predicción real por HTTP; modelo marcado sintético')
         alert=request(base,'/api/alertas')[1][0]
         review={'operacionId':str(uuid.uuid4()),'estado':'CONFIRMADA','motivo':'Riesgo verificado en campo','instruccion':'Priorizar traslado del lote'}

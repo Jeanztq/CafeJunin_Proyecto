@@ -1,0 +1,41 @@
+CREATE SCHEMA IF NOT EXISTS dbo;
+CREATE TABLE IF NOT EXISTS dbo.parcelas (
+  id UUID PRIMARY KEY, nombre VARCHAR(160) NOT NULL, ubicacion VARCHAR(250) NOT NULL, propietario_subject VARCHAR(255) NOT NULL
+);
+INSERT INTO dbo.parcelas (id,nombre,ubicacion,propietario_subject)
+SELECT '11111111-1111-1111-1111-111111111111','El Mirador','Satipo, Junín','operador-local'
+WHERE NOT EXISTS (SELECT 1 FROM dbo.parcelas WHERE id='11111111-1111-1111-1111-111111111111');
+CREATE TABLE IF NOT EXISTS dbo.lotes (
+  id UUID PRIMARY KEY, parcela_id UUID NOT NULL REFERENCES dbo.parcelas(id), fecha_cosecha DATE NOT NULL,
+  variedad VARCHAR(30) NOT NULL, tipo_recoleccion VARCHAR(30) NOT NULL, peso_kg DECIMAL(11,3) NOT NULL CHECK(peso_kg>0),
+  registrado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS dbo.evaluaciones_calidad (
+  id UUID PRIMARY KEY, lote_id UUID NOT NULL REFERENCES dbo.lotes(id), defectos_primarios INT NOT NULL CHECK(defectos_primarios>=0),
+  defectos_secundarios INT NOT NULL CHECK(defectos_secundarios>=0), puntaje_sca DOUBLE PRECISION NOT NULL CHECK(puntaje_sca BETWEEN 0 AND 100),
+  registrado_en TIMESTAMP NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_calidad_lote ON dbo.evaluaciones_calidad(lote_id,registrado_en);
+CREATE TABLE IF NOT EXISTS dbo.fichas_cata (
+  evaluacion_id UUID PRIMARY KEY REFERENCES dbo.evaluaciones_calidad(id), catador_id VARCHAR(255) NOT NULL, catador_nombre VARCHAR(255) NOT NULL,
+  fragancia DOUBLE PRECISION NOT NULL, sabor DOUBLE PRECISION NOT NULL, acidez DOUBLE PRECISION NOT NULL, cuerpo DOUBLE PRECISION NOT NULL,
+  posgusto DOUBLE PRECISION NOT NULL, balance DOUBLE PRECISION NOT NULL, uniformidad DOUBLE PRECISION NOT NULL, dulzor DOUBLE PRECISION NOT NULL,
+  taza_limpia DOUBLE PRECISION NOT NULL, apreciacion_global DOUBLE PRECISION NOT NULL, tazas_leves INT NOT NULL, tazas_graves INT NOT NULL,
+  protocolo VARCHAR(32) NOT NULL, umbral_especialidad DOUBLE PRECISION NOT NULL CHECK(umbral_especialidad BETWEEN 0 AND 100),
+  CHECK (tazas_leves BETWEEN 0 AND 5 AND tazas_graves BETWEEN 0 AND 5 AND tazas_leves+tazas_graves<=5)
+);
+CREATE TABLE IF NOT EXISTS dbo.evaluaciones_riesgo (
+  id UUID PRIMARY KEY, lote_id UUID NOT NULL REFERENCES dbo.lotes(id), humedad DOUBLE PRECISION NOT NULL, horas_demora DOUBLE PRECISION NOT NULL,
+  probabilidad DOUBLE PRECISION NOT NULL CHECK(probabilidad BETWEEN 0 AND 1), modelo VARCHAR(160) NOT NULL,
+  simulada BOOLEAN NOT NULL, genera_alerta BOOLEAN NOT NULL, registrado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS dbo.alertas (
+  id UUID PRIMARY KEY, lote_id UUID NOT NULL REFERENCES dbo.lotes(id), riesgo_id UUID NOT NULL UNIQUE REFERENCES dbo.evaluaciones_riesgo(id),
+  estado VARCHAR(20) NOT NULL, motivo VARCHAR(1000), instruccion VARCHAR(1000), responsable VARCHAR(255), revisada_en TIMESTAMP,
+  operacion_id UUID, registrada_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS dbo.outbox_eventos (
+  id UUID PRIMARY KEY, tipo VARCHAR(100) NOT NULL, agregado_id UUID NOT NULL, ocurrido_en TIMESTAMP NOT NULL, version INT NOT NULL,
+  evaluacion_id UUID, publicado_en TIMESTAMP, intentos INT NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS ix_eventos_lote ON dbo.outbox_eventos(agregado_id,ocurrido_en);

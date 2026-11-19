@@ -2,12 +2,12 @@
 
 ## Ver el portal en cinco minutos
 
-1. Comprueba que Java sea versión 17 o posterior con `java -version`.
-2. Ejecuta `INICIAR-DEMO.cmd` desde la carpeta del proyecto y abre http://localhost:8080.
-3. En Calidad aparece el lote de ejemplo. Sigue [el guion de HU08](docs/GUION-DEMO.md) para registrar y consultar la ficha.
-4. Para crear otra muestra, puedes abrir Cosecha y registrar otro lote. Una segunda evaluación del mismo lote también recibe un identificador propio.
+1. Comprueba que Java sea versión 17 o posterior con **java -version**.
+2. Ejecuta **INICIAR-CAFE-JUNIN.cmd** y abre http://localhost:8080.
+3. En Calidad elige **Registrar cosecha** si todavía no tienes lotes. Selecciona la parcela de origen e ingresa fecha, variedad, recolección y peso. Después abre Calidad y registra la ficha.
+4. Abre **Lotes y muestras → Ver detalle** para ver los movimientos, el puntaje y el perfil sensorial. Puedes cerrar y volver a iniciar el portal.
 
-Al detener la demo se pierden sus registros. El JAR ya contiene React; no hace falta Node ni Maven para verla. No exponer este modo a Internet.
+El perfil local usa una cuenta de operador en este equipo y escucha en la interfaz de bucle local. H2 guarda el archivo **state/cafejunin.mv.db**. El lanzador fija el directorio de trabajo en la raíz del proyecto. Para otro directorio configura CAFEJUNIN_DATA con la ruta base de la base de datos, sin extensión. La configuración de SQL Server y Keycloak para cuentas individuales figura en [Conexiones](docs/CONEXIONES.md).
 
 ## Editar y recompilar
 
@@ -19,7 +19,7 @@ Para editar la web con recarga: inicia el backend, luego `cd web`, `npm ci`, `np
 
 ## Conectar los servicios
 
-Sigue **docs/CONEXIONES.md** para SQL Server, Keycloak, XGBoost y GitHub. Son pasos distintos de la demo en memoria. No se han creado servicios remotos ni publicado el repositorio.
+Sigue **docs/CONEXIONES.md** para SQL Server, Keycloak, XGBoost y GitHub. Son configuraciones independientes del perfil local. No se han creado servicios remotos ni publicado el repositorio.
 
 ## Escritorio de Windows
 

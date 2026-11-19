@@ -26,13 +26,13 @@ Cosecha: `id` UUID estable, `parcelaId` UUID, `fechaCosecha` YYYY-MM-DD, `varied
   "defectosSecundarios": 2,
   "atributos": {
     "fragancia": 8, "sabor": 8.5, "acidez": 8, "cuerpo": 8.5,
-    "posgusto": 8, "balance": 8, "uniformidad": 10, "dulzor": 10
+    "posgusto": 8, "balance": 8, "uniformidad": 10, "dulzor": 10, "tazaLimpia": 10, "apreciacionGlobal": 8
   },
-  "puntajeSca": 85
+  "defectosTaza": {"leves": 1, "graves": 0}
 }
 ```
 
-Los defectos son enteros no negativos, los ocho atributos son obligatorios (0 a 10) y el puntaje manual admite de 0 a 100. El puntaje y los atributos admiten hasta dos decimales. La respuesta 201 y el historial incluyen identidad, fecha, clasificación y atributos. Un envío idéntico con el mismo UUID y catador devuelve la ficha original. Si cambia el contenido o el catador, devuelve 409. Cada nueva muestra usa otro UUID. Las evaluaciones básicas anteriores se leen con atributos y catador nulos.
+Los defectos físicos son enteros no negativos. Los diez atributos y ambos conteos de defectos sensoriales son obligatorios. El servidor calcula el puntaje como la suma de las notas menos la penalización de taza. El ejemplo obtiene 85. La API rechaza un puntaje aportado por el cliente. La respuesta y el detalle incluyen protocolo, umbral aplicado, responsable y fecha. El detalle devuelve también los movimientos cronológicos visibles para la cuenta. Un envío idéntico con el mismo UUID y catador devuelve la ficha original. Si cambia el contenido o el catador, devuelve 409. Cada nueva muestra usa otro UUID. Las evaluaciones básicas anteriores se leen con atributos y catador nulos.
 
 Riesgo: `humedad` 0..100 (relativa ambiental, no del grano), `horasDemora` >=0. Respuesta: `id,loteId,humedad,horasDemora,probabilidad:{valor},modelo,simulada`. Solo si `probabilidad.valor>0.70` se guarda una alerta. Cada solicitud crea una evaluación; no tiene clave idempotente.
 

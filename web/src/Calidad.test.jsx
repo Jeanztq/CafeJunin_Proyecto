@@ -34,16 +34,21 @@ test("permite corregir la ficha, reintentar y consultar el resultado confirmado"
     "Cuerpo",
     "Posgusto",
     "Balance",
-    "Uniformidad",
-    "Dulzor",
+    "Apreciación global",
   ]) {
-    campo(label, "8.5");
+    campo(label, "8");
   }
-  campo("Puntaje SCA final", "105");
+  for (const label of ["Uniformidad", "Dulzor", "Taza limpia"])
+    campo(label, "10");
+  campo("Acidez", "12");
   guardar();
-  expect(screen.getByRole("alert").textContent).toContain("entre 0 y 100");
+  expect(screen.getByRole("alert").textContent).toContain("de 6 a 10");
   expect(api).not.toHaveBeenCalled();
-  campo("Puntaje SCA final", "79.5");
+  campo("Acidez", "7.5");
+  campo("Tazas con defecto leve", "3");
+  expect(
+    screen.getByLabelText("Puntaje final calculado").textContent,
+  ).toContain("79.50");
   api
     .mockRejectedValueOnce(new Error("Conexión interrumpida"))
     .mockImplementationOnce(async (_, options) => ({
@@ -51,12 +56,18 @@ test("permite corregir la ficha, reintentar y consultar el resultado confirmado"
       loteId: lote.id,
       catadorNombre: "Ana",
       registradaEn: "2026-10-30T12:00:00Z",
+      puntajeSca: 79.5,
+      umbralEspecialidad: 80,
+      protocolo: "SCA-2004",
       clasificacion: "Café comercial",
     }));
   guardar();
   await screen.findByText("Conexión interrumpida");
   guardar();
   await screen.findByText("79.50 puntos SCA");
+  expect(JSON.parse(api.mock.calls[1][1].body)).not.toHaveProperty(
+    "puntajeSca",
+  );
   expect(api.mock.calls[1]).toEqual(api.mock.calls[0]);
   expect(screen.getByText("Café comercial")).toBeTruthy();
   expect(screen.getByText(/Ana · Catador/)).toBeTruthy();

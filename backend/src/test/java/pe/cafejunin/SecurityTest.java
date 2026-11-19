@@ -77,9 +77,9 @@ class SecurityTest {
     mvc.perform(post("/api/lotes").with(productor).contentType(json).content(cosecha))
         .andExpect(status().isCreated());
     String ficha = """
-        {"id":"%s","defectosPrimarios":0,"defectosSecundarios":2,"puntajeSca":80,
+        {"id":"%s","defectosPrimarios":0,"defectosSecundarios":2,"defectosTaza":{"leves":0,"graves":0},
          "atributos":{"fragancia":8,"sabor":8,"acidez":8,"cuerpo":8,"posgusto":8,
-                      "balance":8,"uniformidad":10,"dulzor":10}}
+                      "balance":8,"uniformidad":10,"dulzor":10,"tazaLimpia":10,"apreciacionGlobal":8}}
         """.formatted(java.util.UUID.randomUUID());
     var ruta = "/api/lotes/" + lote + "/evaluaciones";
     mvc.perform(post(ruta).with(productor).contentType(json).content(ficha))

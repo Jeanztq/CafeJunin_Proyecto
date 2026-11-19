@@ -14,13 +14,18 @@ public final class RegistrarCalidadService implements RegistrarCalidadUseCase {
   private final PublicarCalidadPort eventos;
   private final UnidadTrabajoPort tx;
   private final Clock reloj;
+  private final double umbralEspecialidad;
 
   public RegistrarCalidadService(
       LoteRepositoryPort lotes,
       CalidadRepositoryPort calidad,
       PublicarCalidadPort eventos,
       UnidadTrabajoPort tx,
-      Clock reloj) {
+      Clock reloj, double umbralEspecialidad) {
+    if (!Double.isFinite(umbralEspecialidad) || umbralEspecialidad < 0 || umbralEspecialidad > 100
+        || java.math.BigDecimal.valueOf(umbralEspecialidad).stripTrailingZeros().scale() > 2)
+      throw new IllegalArgumentException("Umbral de especialidad fuera de rango");
+    this.umbralEspecialidad = umbralEspecialidad;
     this.lotes = lotes;
     this.calidad = calidad;
     this.eventos = eventos;
@@ -30,6 +35,7 @@ public final class RegistrarCalidadService implements RegistrarCalidadUseCase {
 
   public EvaluacionCalidad ejecutar(Solicitud solicitud, Cuenta catador) {
     if (!catador.tiene("CATADOR")) throw new ProhibidoException();
+    double puntaje = solicitud.atributos().subtotalClasico() - solicitud.defectosTaza().penalizacion();
     return tx.ejecutar(() -> {
       if (lotes.buscarLote(solicitud.loteId()).isEmpty())
         throw new NoEncontradoException("Lote no encontrado");
@@ -40,14 +46,15 @@ public final class RegistrarCalidadService implements RegistrarCalidadUseCase {
             && solicitud.loteId().equals(ficha.loteId())
             && solicitud.defectosPrimarios() == ficha.defectosPrimarios()
             && solicitud.defectosSecundarios() == ficha.defectosSecundarios()
-            && solicitud.puntajeSca() == ficha.puntajeSca()
+            && solicitud.defectosTaza().equals(ficha.defectosTaza())
             && solicitud.atributos().equals(ficha.atributos())) return ficha;
         throw new ConflictoException("El identificador ya corresponde a otra ficha");
       }
       var instante = reloj.instant().truncatedTo(ChronoUnit.MILLIS);
       var ficha = new EvaluacionCalidad(solicitud.id(), solicitud.loteId(),
-          solicitud.defectosPrimarios(), solicitud.defectosSecundarios(), solicitud.puntajeSca(),
-          solicitud.atributos(), catador.subject(), catador.nombre(), instante);
+          solicitud.defectosPrimarios(), solicitud.defectosSecundarios(), puntaje,
+          solicitud.atributos(), catador.subject(), catador.nombre(), instante,
+          EvaluacionCalidad.CLASICO, umbralEspecialidad, solicitud.defectosTaza());
       calidad.guardar(ficha);
       eventos.publicar(new EventoFactory.Calidad(ficha.id()).crear(ficha.loteId(), instante));
       return ficha;

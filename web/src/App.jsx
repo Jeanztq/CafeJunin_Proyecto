@@ -12,6 +12,13 @@ import {
 } from "lucide-react";
 import { api } from "./api";
 import Calidad, { ResultadoCalidad } from "./Calidad";
+const hitos = {
+  CosechaRegistrada: "Cosecha registrada",
+  EvaluacionCalidadRegistrada: "Evaluación de calidad registrada",
+  RiesgoEvaluado: "Riesgo evaluado",
+  RiesgoAltoDetectado: "Riesgo alto detectado",
+  AlertaRevisada: "Alerta revisada",
+};
 const labels = {
   PRODUCTOR: "Productor",
   CATADOR: "Catador Q-Grader",
@@ -200,13 +207,8 @@ export default function App({ config, identity }) {
           ))}
         </nav>
         <div className="aside-bottom">
-          <span>COOPERATIVA · PILOTO</span>
+          <span>COOPERATIVA</span>
           <p>Junín, Perú</p>
-          <small>
-            {account?.demostracion
-              ? "Demostración local"
-              : "Portal de operaciones"}
-          </small>
         </div>
       </aside>
       <div className="workspace">
@@ -235,12 +237,6 @@ export default function App({ config, identity }) {
           </div>
         </header>
         <main>
-          {!config.seguridadActiva && page !== "Calidad" && (
-            <div className="banner">
-              DEMOSTRACIÓN LOCAL · Sin inicio de sesión. Reúne permisos de
-              prueba; no usar expuesto a Internet.
-            </div>
-          )}
           {page !== "Calidad" && (
             <div className="page-title">
               <div>
@@ -254,7 +250,7 @@ export default function App({ config, identity }) {
               </div>
               <span className="pill">
                 {config.predictor === "rules"
-                  ? "Reglas de demostración"
+                  ? "Estimación por reglas"
                   : "Servicio XGBoost"}
               </span>
             </div>
@@ -320,17 +316,6 @@ export default function App({ config, identity }) {
                   </p>
                 </section>
               )}
-              <section>
-                <h2>Recorrido disponible</h2>
-                <p>
-                  Productor: cosecha → Catador: calidad → Supervisor: riesgo y
-                  revisión de alertas.
-                </p>
-                <p className="muted">
-                  El puntaje de calidad se registra manualmente. Las
-                  recomendaciones del modelo requieren validación humana.
-                </p>
-              </section>
             </>
           )}
           {page === "Lotes" && (
@@ -396,6 +381,20 @@ export default function App({ config, identity }) {
                     {parcels.find((p) => p.id === detail.lote.parcelaId)
                       ?.nombre || short(detail.lote.parcelaId)}
                   </p>
+                  <h4>Movimientos del lote</h4>
+                  <ol className="movimientos">
+                    {detail.historial.map((h) => (
+                      <li key={h.id}>
+                        <strong>{hitos[h.tipo] || h.tipo}</strong>
+                        {" · "}
+                        <time dateTime={h.ocurridoEn}>
+                          {new Date(h.ocurridoEn).toLocaleString("es-PE", {
+                            timeZone: "America/Lima",
+                          })}
+                        </time>
+                      </li>
+                    ))}
+                  </ol>
                   <h4>Calidad</h4>
                   {detail.calidad.length ? (
                     detail.calidad.map((q) => (
@@ -419,7 +418,8 @@ export default function App({ config, identity }) {
                       {detail.riesgos.map((q) => (
                         <p key={q.id}>
                           {(q.probabilidad.valor * 100).toFixed(1)}% ·{" "}
-                          {q.modelo} {q.simulada ? "· demostración" : ""}
+                          {q.modelo}{" "}
+                          {q.simulada ? "· estimación sin validar" : ""}
                         </p>
                       ))}
                     </>
@@ -492,6 +492,9 @@ export default function App({ config, identity }) {
             <Calidad
               lotes={lots}
               parcelas={parcels}
+              registrarCosecha={
+                can("PRODUCTOR") ? () => setPage("Cosecha") : undefined
+              }
               cancelar={() => setPage("Lotes")}
             />
           )}
@@ -541,7 +544,7 @@ export default function App({ config, identity }) {
                   <small>
                     {result.modelo} ·{" "}
                     {result.simulada
-                      ? "DEMOSTRACIÓN, NO VALIDADO PARA DECISIONES REALES"
+                      ? "Estimación sin validación de campo"
                       : "Verificar validación del modelo antes de uso operativo"}
                   </small>
                 </div>

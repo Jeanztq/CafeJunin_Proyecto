@@ -4,12 +4,17 @@ import java.time.Instant;
 import java.util.Objects;
 import pe.cafejunin.domain.valueobjects.AtributosSensoriales;
 import java.util.UUID;
+import pe.cafejunin.domain.valueobjects.DefectosTaza;
 
 public record EvaluacionCalidad(
     UUID id, UUID loteId, int defectosPrimarios, int defectosSecundarios, double puntajeSca,
-    AtributosSensoriales atributos, String catadorId, String catadorNombre, Instant registradaEn) {
+    AtributosSensoriales atributos, String catadorId, String catadorNombre, Instant registradaEn,
+    String protocolo, double umbralEspecialidad, DefectosTaza defectosTaza) {
+  public static final String CLASICO = "SCA-2004";
+  public static final String MANUAL = "MANUAL-V1";
+
   public String getClasificacion() {
-    return puntajeSca >= 80 ? "Café especial" : "Café comercial";
+    return puntajeSca >= umbralEspecialidad ? "Café especial" : "Café comercial";
   }
 
   public EvaluacionCalidad {

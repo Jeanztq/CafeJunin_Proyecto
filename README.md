@@ -1,4 +1,4 @@
-# Café Junín · Entrega 0.2
+# Café Junín
 
 Sistema de trazabilidad del café. Un backend compartido para portal web y futuro cliente móvil sincronizado. Empieza por **LEEME-PRIMERO.md**. Esta entrega amplía la versión anterior en una carpeta independiente.
 
